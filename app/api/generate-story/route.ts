@@ -1,6 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,21 +13,29 @@ export async function POST(req: NextRequest) {
     // Check free tier limit
     const { userId } = await auth();
     if (userId) {
-      const now = new Date();
-      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const user = await currentUser();
+      const email = user?.emailAddresses?.[0]?.emailAddress;
 
-      const { data: usage } = await supabaseAdmin
-        .from("user_usage")
-        .select("*")
-        .eq("clerk_user_id", userId)
-        .eq("month", month)
-        .single();
+      // Bypass limit for test account
+      const isTestUser = email === "dsrchaitu007@gmail.com";
 
-      if (usage && !usage.is_paid && usage.story_count >= 3) {
-        return NextResponse.json(
-          { error: "Free limit reached. Upgrade to ₹99/month for unlimited stories.", code: "UPGRADE_REQUIRED" },
-          { status: 403 }
-        );
+      if (!isTestUser) {
+        const now = new Date();
+        const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+        const { data: usage } = await supabaseAdmin
+          .from("user_usage")
+          .select("*")
+          .eq("clerk_user_id", userId)
+          .eq("month", month)
+          .single();
+
+        if (usage && !usage.is_paid && usage.story_count >= 3) {
+          return NextResponse.json(
+            { error: "Free limit reached. Upgrade to ₹99/month for unlimited stories.", code: "UPGRADE_REQUIRED" },
+            { status: 403 }
+          );
+        }
       }
     }
 
