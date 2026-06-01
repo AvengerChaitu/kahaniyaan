@@ -28,6 +28,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Check if user is paid
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const { data: usage } = await supabase
+    .from("user_usage")
+    .select("is_paid")
+    .eq("clerk_user_id", userId)
+    .eq("month", month)
+    .single();
+
+  if (!usage?.is_paid) {
+    return NextResponse.json(
+      { error: "Saving stories requires a paid plan. Upgrade to ₹99/month.", code: "UPGRADE_REQUIRED" },
+      { status: 403 }
+    );
+  }
+
   try {
     const { title, body, language, theme, child_name, age } = await req.json();
 

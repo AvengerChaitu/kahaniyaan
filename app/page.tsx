@@ -87,61 +87,12 @@ export default function KahaniyanLanding() {
   return (
     <div style={{ fontFamily: "'Sora', sans-serif", background: "#FFF8F0", minHeight: "100vh" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
 
-        .navbar {
-          background: #150827;
-          padding: 0 3rem;
-          height: 64px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .logo-box {
-          width: 34px; height: 34px;
-          background: #E8812A;
-          border-radius: 9px;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 17px;
-        }
-        .logo-wordmark { font-size: 19px; font-weight: 500; color: #FFF8F0; letter-spacing: 0.3px; }
-        .logo-wordmark span { color: #E8812A; }
-        .nav-links { display: flex; align-items: center; gap: 28px; }
-        .nav-link { color: #a890c4; font-size: 14px; text-decoration: none; transition: color 0.2s; }
-        .nav-link:hover { color: #FFF8F0; }
-        .nav-signin {
-          background: transparent;
-          color: #FFF8F0;
-          border: 1px solid rgba(255,255,255,0.2);
-          padding: 8px 20px;
-          border-radius: 22px;
-          font-size: 14px;
-          cursor: pointer;
-          font-family: inherit;
-          transition: all 0.2s;
-        }
-        .nav-signin:hover { background: rgba(255,255,255,0.08); }
-        .nav-signin-filled {
-          background: #E8812A;
-          color: white;
-          border: none;
-          padding: 8px 20px;
-          border-radius: 22px;
-          font-size: 14px;
-          cursor: pointer;
-          font-family: inherit;
-          transition: all 0.2s;
-        }
-        .nav-signin-filled:hover { background: #d4721f; }
-
         .hero {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           background: linear-gradient(160deg, #150827 0%, #2a1250 55%, #1a0d38 100%);
           padding: 72px 3rem 80px;
           text-align: center;
@@ -170,6 +121,8 @@ export default function KahaniyanLanding() {
           border-radius: 20px;
           margin-bottom: 28px;
           letter-spacing: 1.5px;
+          position: relative;
+          z-index: 2;
         }
         .hero-title {
           font-size: 52px;
@@ -177,6 +130,8 @@ export default function KahaniyanLanding() {
           line-height: 1.15;
           margin-bottom: 20px;
           letter-spacing: -1px;
+          position: relative;
+          z-index: 2;
         }
         .hero-title-line1 { color: #FFF8F0; display: block; }
         .hero-title-line2 { color: #E8812A; display: block; font-weight: 500; }
@@ -187,8 +142,18 @@ export default function KahaniyanLanding() {
           margin: 0 auto 40px;
           line-height: 1.7;
           font-weight: 300;
+          position: relative;
+          z-index: 2;
         }
-        .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 52px; }
+        .hero-btns {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-bottom: 52px;
+          position: relative;
+          z-index: 2;
+        }
         .btn-primary {
           background: #E8812A;
           color: white;
@@ -221,6 +186,8 @@ export default function KahaniyanLanding() {
           flex-wrap: wrap;
           justify-content: center;
           gap: 10px;
+          position: relative;
+          z-index: 2;
         }
         .lang-pill {
           background: rgba(255,255,255,0.06);
@@ -264,7 +231,6 @@ export default function KahaniyanLanding() {
         }
         @media (max-width: 768px) {
           .generator-grid { grid-template-columns: 1fr; }
-          .navbar { padding: 0 1.5rem; }
           .generator-section { padding: 60px 1.5rem; }
           .hero-title { font-size: 36px; }
           .hero { padding: 60px 1.5rem; }
@@ -273,7 +239,6 @@ export default function KahaniyanLanding() {
           .themes-grid { grid-template-columns: repeat(3, 1fr) !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
           .footer { flex-direction: column; gap: 8px; padding: 24px 1.5rem; }
-          .nav-link { display: none; }
         }
 
         .form-card {

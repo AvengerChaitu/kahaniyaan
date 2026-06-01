@@ -1,24 +1,6 @@
-import { getGeminiModel } from "@/lib/gemini";
+import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
-
-async function generateWithRetry(prompt: string, maxRetries = 3): Promise<string> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const model = getGeminiModel();
-      const result = await model.generateContent(prompt);
-      return result.response.text();
-    } catch (error: any) {
-      if (error?.status === 429 && attempt < maxRetries) {
-        const delay = Math.pow(2, attempt) * 1000;
-        console.warn(`Gemini 429 (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms`);
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-      throw error;
-    }
-  }
-  throw new Error("Max retries exceeded");
-}
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,17 +10,84 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const prompt = `Write a short, engaging bedtime story for a ${age}-year-old Indian child named ${name}. The story should be in ${language} and follow the theme of "${theme}". The child ${name} should be the hero of the story. The story should be culturally rooted in Indian traditions, values, and storytelling style. Keep it age-appropriate, warm, and moral-driven. Output the story with a title on the first line, then a blank line, then the story body. The title should be in English. The story body should be in ${language}.`;
+    // Check free tier limit
+    const { userId } = await auth();
+    if (userId) {
+      const now = new Date();
+      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    const content = await generateWithRetry(prompt);
+      const { data: usage } = await supabase
+        .from("user_usage")
+        .select("*")
+        .eq("clerk_user_id", userId)
+        .eq("month", month)
+        .single();
 
-    const lines = content.split("\n").filter((l) => l.trim());
-    const title = lines[0]?.replace(/^["*#]+|["*#]+$/g, "").trim() || `${name}'s ${theme} Adventure`;
-    const body = lines.slice(1).join("\n\n").trim();
+      if (usage && !usage.is_paid && usage.story_count >= 3) {
+        return NextResponse.json(
+          { error: "Free limit reached. Upgrade to ₹99/month for unlimited stories.", code: "UPGRADE_REQUIRED" },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Map UI age format to DB format
+    const ageGroup = age.replace(" yrs", "");
+
+    // Fetch matching stories from database
+    const { data: templates, error } = await supabase
+      .from("story_templates")
+      .select("*")
+      .eq("language", language)
+      .eq("age_group", ageGroup)
+      .eq("theme", theme);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
+
+    if (!templates || templates.length === 0) {
+      return NextResponse.json(
+        { error: `No stories available for ${language}/${theme}. New stories coming soon!` },
+        { status: 404 }
+      );
+    }
+
+    // Pick a random story
+    const template = templates[Math.floor(Math.random() * templates.length)];
+
+    // Replace placeholders
+    const title = template.title.replace(/\{childname\}/g, name);
+    const body = template.body.replace(/\{childname\}/g, name);
+
+    // Track usage for logged-in users
+    if (userId) {
+      const now = new Date();
+      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+      const { data: existing } = await supabase
+        .from("user_usage")
+        .select("*")
+        .eq("clerk_user_id", userId)
+        .eq("month", month)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from("user_usage")
+          .update({ story_count: existing.story_count + 1, updated_at: new Date() })
+          .eq("id", existing.id);
+      } else {
+        await supabase
+          .from("user_usage")
+          .insert({ clerk_user_id: userId, story_count: 1, month, is_paid: false });
+      }
+    }
 
     return NextResponse.json({ title, body });
   } catch (error) {
-    console.error("Gemini error:", error);
-    return NextResponse.json({ error: "Failed to generate story" }, { status: 500 });
+    console.error("Story fetch error:", error);
+    return NextResponse.json({ error: "Failed to fetch story" }, { status: 500 });
   }
 }
