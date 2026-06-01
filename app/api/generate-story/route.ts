@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Map UI age format to DB format
-    const ageGroup = age.replace(" yrs", "");
+    const ageGroup = age.replace(" yrs", "").replace("–", "-");
 
     // Fetch matching stories from database
     const { data: templates, error } = await supabaseAdmin
