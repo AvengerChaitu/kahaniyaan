@@ -554,29 +554,6 @@ export default function KahaniyanLanding() {
         .footer-text { font-size: 12px; color: #4a3a60; }
       `}</style>
 
-      {/* NAVBAR */}
-      <nav className="navbar">
-        <a className="logo" href="/">
-          <div className="logo-box">📖</div>
-          <div className="logo-wordmark">Kahani<span>yaan</span></div>
-        </a>
-        <div className="nav-links">
-          <a className="nav-link" href="#stories">Stories</a>
-          <a className="nav-link" href="#pricing">Pricing</a>
-          <a className="nav-link" href="/library">Library</a>
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <button className="nav-signin">Sign in</button>
-            </SignInButton>
-          </Show>
-          <Show when="signed-in">
-            <SignInButton mode="modal">
-              <button className="nav-signin-filled">Account</button>
-            </SignInButton>
-          </Show>
-        </div>
-      </nav>
-
       {/* HERO */}
       <section className="hero">
         <div className="hero-badge">✦ 10+ INDIAN LANGUAGES</div>
