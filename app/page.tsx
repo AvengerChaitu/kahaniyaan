@@ -81,6 +81,43 @@ export default function KahaniyanLanding() {
     }
   }
 
+  function downloadPDF() {
+    if (!story) return;
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`
+      <html>
+        <head>
+          <title>${story.title} — Kahaniyaan</title>
+          <style>
+            body { font-family: 'Georgia', serif; max-width: 600px; margin: 60px auto; padding: 0 40px; color: #1a0a2e; line-height: 1.8; }
+            .story-header { border-bottom: 2px solid #E8812A; padding-bottom: 16px; margin-bottom: 32px; }
+            .story-tag { font-size: 11px; letter-spacing: 1.5px; color: #E8812A; font-weight: 600; margin-bottom: 10px; }
+            .story-title { font-size: 28px; font-weight: 600; color: #1a0a2e; margin: 0; }
+            .story-title span { color: #E8812A; }
+            .read-time { font-size: 12px; color: #999; margin-top: 6px; }
+            .story-body { font-size: 16px; line-height: 1.9; color: #2d1558; }
+            .story-body b { color: #E8812A; font-weight: 600; }
+            .moral { margin-top: 32px; padding: 16px 20px; background: #fff8f0; border-left: 4px solid #E8812A; font-style: italic; color: #7a5540; font-size: 14px; }
+            .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #ccc; border-top: 1px solid #eee; padding-top: 16px; }
+          </style>
+        </head>
+        <body>
+          <div class="story-header">
+            <div class="story-tag">✦ ${story.theme.toUpperCase()} · ${story.language.toUpperCase()}</div>
+            <h1 class="story-title"><span>${story.childName}</span> ${story.title.replace(story.childName, '').trim()}</h1>
+            <div class="read-time">~${readingTime} min read</div>
+          </div>
+          <div class="story-body">${story.body.replace(/\n/g, '<br/>')}</div>
+          <div class="moral">🪔 <strong>Seekh:</strong> Always use your wit — the smartest answer wins.</div>
+          <div class="footer">Generated with ❤️ on Kahaniyaan.vercel.app</div>
+        </body>
+      </html>
+    `);
+    win.document.close();
+    win.print();
+  }
+
   const displayName = childName || "Arjun";
   const readingTime = story ? Math.max(1, Math.ceil(story.body.split(/\s+/).length / 200)) : 0;
 
@@ -396,16 +433,21 @@ export default function KahaniyanLanding() {
           flex: 1;
           padding: 10px 8px;
           border-radius: 12px;
-          border: 1px solid rgba(255,255,255,0.1);
-          background: rgba(255,255,255,0.04);
-          color: #9880b8;
+          border: 1px solid rgba(232, 129, 42, 0.3);
+          background: rgba(232, 129, 42, 0.08);
+          color: #f0a75b;
           font-size: 12px;
           font-family: inherit;
           cursor: pointer;
           display: flex; align-items: center; justify-content: center; gap: 6px;
           transition: all 0.15s;
+          letter-spacing: 0.3px;
         }
-        .story-action:hover { background: rgba(255,255,255,0.08); color: #FFF8F0; }
+        .story-action:hover {
+          background: rgba(232, 129, 42, 0.18);
+          color: #E8812A;
+          border-color: rgba(232, 129, 42, 0.5);
+        }
 
         .themes-section {
           padding: 0 3rem 80px;
@@ -668,7 +710,7 @@ export default function KahaniyanLanding() {
                       {saved ? "✅ Saved" : saving ? "⏳..." : "🔖 Save"}
                     </button>
                   </Show>
-                  <button className="story-action" onClick={() => window.print()}>⬇️ PDF</button>
+                  <button className="story-action" onClick={downloadPDF}>⬇️ PDF</button>
                   <button className="story-action" onClick={() => { setStory(null); setError(""); }}>🔄 New</button>
                 </div>
               </>
