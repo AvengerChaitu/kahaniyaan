@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useUser, Show, SignInButton } from "@clerk/nextjs";
 
-const ages = ["3–4 yrs", "5–6 yrs", "7–8 yrs", "9–10 yrs"];
-const languages = ["Hindi", "Telugu", "Tamil", "Kannada", "Malayalam", "Marathi", "Bengali", "Gujarati", "Punjabi", "English"];
-const themes = ["Panchatantra", "Birbal", "Tenali Raman", "Festival", "Moral Story"];
+const LANGUAGES = ["Hindi", "Telugu", "Tamil", "Kannada", "Malayalam", "Marathi", "Bengali", "Gujarati", "Punjabi", "English"];
+const LANG_SCRIPTS = ["हिंदी", "తెలుగు", "தமிழ்", "ಕನ್ನಡ", "മലയാളം", "मराठी", "বাংলা", "ગુજરાતી", "ਪੰਜਾਬੀ", "English"];
+const AGE_GROUPS = ["3–4 yrs", "5–6 yrs", "7–8 yrs", "9–10 yrs"];
+const THEMES = ["Panchatantra", "Birbal", "Tenali Raman", "Festival", "Moral Story"];
+const THEME_ICONS: Record<string, string> = { Panchatantra: "🐘", Birbal: "👑", "Tenali Raman": "🎭", Festival: "🪔", "Moral Story": "⭐" };
+const THEME_COUNTS: Record<string, string> = { Panchatantra: "12 stories", Birbal: "8 stories", "Tenali Raman": "8 stories", Festival: "6 stories", "Moral Story": "6 stories" };
 
 interface Story {
   title: string;
@@ -16,48 +19,12 @@ interface Story {
   childName: string;
 }
 
-function SparkleIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5"><path d="M12 2l2 7h7l-5 4 2 7-6-4-6 4 2-7-5-4h7z"/></svg>
-  );
-}
-
-function WandIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 shrink-0 text-[#E8812A]"><polyline points="20 6 9 17 4 12"/></svg>
-  );
-}
-
-function BookmarkIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-  );
-}
-
-function RefreshIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-  );
-}
-
-export default function LandingPage() {
+export default function KahaniyanLanding() {
   const { isSignedIn } = useUser();
-  const [name, setName] = useState("Arjun");
-  const [age, setAge] = useState("5–6 yrs");
-  const [language, setLanguage] = useState("Hindi");
-  const [theme, setTheme] = useState("Panchatantra");
+  const [childName, setChildName] = useState("Arjun");
+  const [selectedAge, setSelectedAge] = useState("5–6 yrs");
+  const [selectedLang, setSelectedLang] = useState("Hindi");
+  const [selectedTheme, setSelectedTheme] = useState("Panchatantra");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [story, setStory] = useState<Story | null>(null);
@@ -65,22 +32,22 @@ export default function LandingPage() {
   const [saving, setSaving] = useState(false);
 
   async function generateStory() {
-    if (!name.trim()) return;
+    if (!childName.trim()) return;
     setLoading(true);
     setStory(null);
     setSaved(false);
     setError("");
 
     try {
-      const ageValue = age.replace(" yrs", "");
+      const ageValue = selectedAge.replace(" yrs", "");
       const res = await fetch("/api/generate-story", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), age: ageValue, language, theme }),
+        body: JSON.stringify({ name: childName.trim(), age: ageValue, language: selectedLang, theme: selectedTheme }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate story");
-      setStory({ title: data.title, body: data.body, language, theme, age: ageValue, childName: name.trim() });
+      setStory({ title: data.title, body: data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim() });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -114,188 +81,653 @@ export default function LandingPage() {
     }
   }
 
-  function ChipGroup<T extends string>({ items, value, onChange, variant }: { items: readonly T[]; value: T; onChange: (v: T) => void; variant?: "theme" }) {
-    return (
-      <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <button
-            key={item}
-            onClick={() => onChange(item)}
-            className={`px-4 py-1.5 rounded-full text-sm cursor-pointer transition-all ${
-              value === item
-                ? variant === "theme"
-                  ? "bg-[#E8812A] text-white border border-[#E8812A]"
-                  : "bg-[#1a0a2e] text-white border border-[#1a0a2e]"
-                : "bg-white text-[#7a5540] border border-[#e8d5c4] hover:border-[#E8812A]"
-            }`}
-          >
-            {item}
-          </button>
-        ))}
-      </div>
-    );
-  }
-
+  const displayName = childName || "Arjun";
   const readingTime = story ? Math.max(1, Math.ceil(story.body.split(/\s+/).length / 200)) : 0;
 
   return (
-    <div className="bg-[#FFF8F0] min-h-screen">
-      {/* Hero */}
-      <section className="bg-gradient(160deg, #1a0a2e 0%, #2d1558 60%, #1a0a2e 100%) px-4 md:px-8 py-16 md:py-20 text-center relative overflow-hidden">
-        <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 bg-[rgba(232,129,42,0.2)] border border-[rgba(232,129,42,0.4)] text-[#f0a75b] text-xs px-3.5 py-1 rounded-full mb-5 tracking-wider">
-            ✦ 10+ INDIAN LANGUAGES
-          </div>
-          <h1 className="text-[2.5rem] md:text-[42px] font-medium text-[#FFF8F0] leading-tight mb-4">
-            Bedtime stories where<br />
-            <span className="text-[#E8812A]">your child is the hero</span>
-          </h1>
-          <p className="text-base text-[#c9b8d8] max-w-[480px] mx-auto mb-8 leading-relaxed">
-            Personalized Indian bedtime stories rooted in Panchatantra, Birbal &amp; Tenali Raman — in your mother tongue.
-          </p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            <a href="#generator" className="inline-flex items-center gap-2 bg-[#E8812A] text-white border-none px-7 py-3.5 rounded-full text-sm cursor-pointer font-medium no-underline hover:bg-[#d07222] transition-colors">
-              <WandIcon /> Create a free story
-            </a>
-            <a href="#how-it-works" className="inline-flex items-center gap-2 bg-transparent text-[#FFF8F0] border border-[rgba(255,248,240,0.3)] px-7 py-3.5 rounded-full text-sm cursor-pointer no-underline hover:bg-[rgba(255,255,255,0.05)] transition-colors">
-              See how it works
-            </a>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2 mt-10">
-            {["हिंदी", "తెలుగు", "தமிழ்", "ಕನ್ನಡ", "മലയാളം", "मराठी", "বাংলা", "ગુજરાતી", "ਪੰਜਾਬੀ", "English"].map((l) => (
-              <span key={l} className="px-3.5 py-1.5 text-sm bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.15)] text-[#e8d5ff] rounded-full">
-                {l}
-              </span>
-            ))}
-          </div>
+    <div style={{ fontFamily: "'Sora', sans-serif", background: "#FFF8F0", minHeight: "100vh" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        .navbar {
+          background: #150827;
+          padding: 0 3rem;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-box {
+          width: 34px; height: 34px;
+          background: #E8812A;
+          border-radius: 9px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 17px;
+        }
+        .logo-wordmark { font-size: 19px; font-weight: 500; color: #FFF8F0; letter-spacing: 0.3px; }
+        .logo-wordmark span { color: #E8812A; }
+        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .nav-link { color: #a890c4; font-size: 14px; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #FFF8F0; }
+        .nav-signin {
+          background: transparent;
+          color: #FFF8F0;
+          border: 1px solid rgba(255,255,255,0.2);
+          padding: 8px 20px;
+          border-radius: 22px;
+          font-size: 14px;
+          cursor: pointer;
+          font-family: inherit;
+          transition: all 0.2s;
+        }
+        .nav-signin:hover { background: rgba(255,255,255,0.08); }
+        .nav-signin-filled {
+          background: #E8812A;
+          color: white;
+          border: none;
+          padding: 8px 20px;
+          border-radius: 22px;
+          font-size: 14px;
+          cursor: pointer;
+          font-family: inherit;
+          transition: all 0.2s;
+        }
+        .nav-signin-filled:hover { background: #d4721f; }
+
+        .hero {
+          background: linear-gradient(160deg, #150827 0%, #2a1250 55%, #1a0d38 100%);
+          padding: 72px 3rem 80px;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+        .hero::before {
+          content: '';
+          position: absolute;
+          top: -60px; left: 50%;
+          transform: translateX(-50%);
+          width: 600px; height: 600px;
+          background: radial-gradient(circle, rgba(232,129,42,0.08) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(232,129,42,0.12);
+          border: 1px solid rgba(232,129,42,0.3);
+          color: #f0a75b;
+          font-size: 11px;
+          font-weight: 500;
+          padding: 5px 16px;
+          border-radius: 20px;
+          margin-bottom: 28px;
+          letter-spacing: 1.5px;
+        }
+        .hero-title {
+          font-size: 52px;
+          font-weight: 300;
+          line-height: 1.15;
+          margin-bottom: 20px;
+          letter-spacing: -1px;
+        }
+        .hero-title-line1 { color: #FFF8F0; display: block; }
+        .hero-title-line2 { color: #E8812A; display: block; font-weight: 500; }
+        .hero-sub {
+          font-size: 16px;
+          color: #b09acc;
+          max-width: 440px;
+          margin: 0 auto 40px;
+          line-height: 1.7;
+          font-weight: 300;
+        }
+        .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 52px; }
+        .btn-primary {
+          background: #E8812A;
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          border-radius: 32px;
+          font-size: 15px;
+          font-weight: 500;
+          cursor: pointer;
+          font-family: inherit;
+          display: flex; align-items: center; gap: 8px;
+          transition: all 0.2s;
+          box-shadow: 0 4px 24px rgba(232,129,42,0.35);
+        }
+        .btn-primary:hover { background: #d4721f; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(232,129,42,0.45); }
+        .btn-ghost {
+          background: transparent;
+          color: #FFF8F0;
+          border: 1px solid rgba(255,255,255,0.2);
+          padding: 15px 30px;
+          border-radius: 32px;
+          font-size: 15px;
+          cursor: pointer;
+          font-family: inherit;
+          transition: all 0.2s;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.07); }
+        .lang-row {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 10px;
+        }
+        .lang-pill {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          color: #d4bfea;
+          padding: 7px 18px;
+          border-radius: 20px;
+          font-size: 14px;
+          letter-spacing: 0.3px;
+          transition: all 0.2s;
+          cursor: default;
+        }
+        .lang-pill:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+
+        .generator-section {
+          padding: 80px 3rem;
+          max-width: 1160px;
+          margin: 0 auto;
+        }
+        .section-eyebrow {
+          text-align: center;
+          font-size: 11px;
+          letter-spacing: 2.5px;
+          color: #E8812A;
+          font-weight: 500;
+          margin-bottom: 10px;
+        }
+        .section-title {
+          text-align: center;
+          font-size: 32px;
+          font-weight: 400;
+          color: #150827;
+          margin-bottom: 48px;
+          letter-spacing: -0.5px;
+        }
+        .generator-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          align-items: start;
+        }
+        @media (max-width: 768px) {
+          .generator-grid { grid-template-columns: 1fr; }
+          .navbar { padding: 0 1.5rem; }
+          .generator-section { padding: 60px 1.5rem; }
+          .hero-title { font-size: 36px; }
+          .hero { padding: 60px 1.5rem; }
+          .pricing-section { padding: 60px 1.5rem; }
+          .themes-section { padding: 0 1.5rem 60px; }
+          .themes-grid { grid-template-columns: repeat(3, 1fr) !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+          .footer { flex-direction: column; gap: 8px; padding: 24px 1.5rem; }
+          .nav-link { display: none; }
+        }
+
+        .form-card {
+          background: white;
+          border-radius: 24px;
+          padding: 32px;
+          border: 1px solid #ede0d4;
+          box-shadow: 0 2px 20px rgba(21,8,39,0.06);
+        }
+        .form-card-header {
+          display: flex; align-items: center; gap: 12px;
+          padding-bottom: 20px;
+          margin-bottom: 24px;
+          border-bottom: 1px solid #f5ece0;
+        }
+        .form-header-icon {
+          width: 38px; height: 38px;
+          background: #fff3e6;
+          border-radius: 11px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 19px;
+        }
+        .form-header-title { font-size: 15px; font-weight: 500; color: #150827; }
+        .form-header-sub { font-size: 12px; color: #aaa; margin-top: 1px; }
+
+        .field { margin-bottom: 22px; }
+        .field-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 600;
+          color: #bbb;
+          letter-spacing: 1px;
+          margin-bottom: 10px;
+          text-transform: uppercase;
+        }
+        .name-input {
+          width: 100%;
+          padding: 12px 16px;
+          border: 1.5px solid #ede0d4;
+          border-radius: 14px;
+          font-size: 15px;
+          font-family: inherit;
+          color: #150827;
+          background: #fffaf6;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .name-input:focus { border-color: #E8812A; }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+          padding: 8px 18px;
+          border-radius: 22px;
+          border: 1.5px solid #e8d5c4;
+          background: white;
+          color: #8a6550;
+          font-size: 13px;
+          font-family: inherit;
+          cursor: pointer;
+          transition: all 0.15s;
+          font-weight: 400;
+        }
+        .chip:hover { border-color: #E8812A; color: #E8812A; }
+        .chip-age-active { background: #150827; border-color: #150827; color: white; }
+        .chip-lang-active { background: #150827; border-color: #150827; color: white; }
+        .chip-theme-active { background: #E8812A; border-color: #E8812A; color: white; }
+
+        .generate-btn {
+          width: 100%;
+          padding: 16px;
+          background: #150827;
+          color: #FFF8F0;
+          border: none;
+          border-radius: 16px;
+          font-size: 15px;
+          font-weight: 500;
+          font-family: inherit;
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          margin-top: 4px;
+          transition: all 0.2s;
+          letter-spacing: 0.2px;
+        }
+        .generate-btn:hover { background: #2a1250; transform: translateY(-1px); }
+        .generate-btn .spark { font-size: 18px; }
+
+        .story-card {
+          background: #150827;
+          border-radius: 24px;
+          padding: 32px;
+          min-height: 420px;
+          position: relative;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.06);
+        }
+        .story-card::before {
+          content: '';
+          position: absolute;
+          top: -40px; right: -40px;
+          width: 200px; height: 200px;
+          background: radial-gradient(circle, rgba(232,129,42,0.1) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .story-empty {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 360px;
+          gap: 16px;
+        }
+        .story-empty-icon { font-size: 48px; opacity: 0.3; }
+        .story-empty-text { color: #6b5580; font-size: 14px; text-align: center; line-height: 1.6; }
+
+        .story-top {
+          display: flex; justify-content: space-between; align-items: flex-start;
+          margin-bottom: 20px;
+        }
+        .story-tag {
+          background: rgba(232,129,42,0.15);
+          border: 1px solid rgba(232,129,42,0.3);
+          color: #f0a75b;
+          font-size: 10px;
+          font-weight: 600;
+          padding: 5px 12px;
+          border-radius: 20px;
+          letter-spacing: 1px;
+        }
+        .story-read-time { font-size: 12px; color: #7860a0; }
+        .story-title {
+          font-size: 24px;
+          font-weight: 500;
+          color: #FFF8F0;
+          margin-bottom: 18px;
+          line-height: 1.3;
+          letter-spacing: -0.3px;
+        }
+        .story-title .name-highlight { color: #E8812A; }
+        .story-body {
+          font-size: 14px;
+          line-height: 1.85;
+          color: #b09acc;
+          font-weight: 300;
+        }
+        .story-body strong { color: #E8812A; font-weight: 500; }
+        .story-divider {
+          border: none;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          margin: 20px 0;
+        }
+        .story-moral { font-size: 13px; color: #8870a8; font-style: italic; }
+        .story-moral .moral-label { color: #f0a75b; font-style: normal; font-weight: 500; }
+        .story-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .story-action {
+          flex: 1;
+          padding: 10px 8px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.04);
+          color: #9880b8;
+          font-size: 12px;
+          font-family: inherit;
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center; gap: 6px;
+          transition: all 0.15s;
+        }
+        .story-action:hover { background: rgba(255,255,255,0.08); color: #FFF8F0; }
+
+        .themes-section {
+          padding: 0 3rem 80px;
+          max-width: 1160px;
+          margin: 0 auto;
+        }
+        .themes-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 14px;
+          margin-top: 48px;
+        }
+        @media (max-width: 600px) {
+          .themes-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        .theme-card {
+          background: white;
+          border-radius: 20px;
+          padding: 24px 16px;
+          text-align: center;
+          border: 1px solid #ede0d4;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .theme-card:hover {
+          border-color: #E8812A;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 24px rgba(232,129,42,0.12);
+        }
+        .theme-emoji { font-size: 32px; margin-bottom: 12px; }
+        .theme-name { font-size: 13px; font-weight: 500; color: #150827; margin-bottom: 4px; }
+        .theme-count { font-size: 11px; color: #bbb; }
+
+        .pricing-section {
+          background: #150827;
+          padding: 80px 3rem;
+        }
+        .pricing-inner { max-width: 900px; margin: 0 auto; }
+        .pricing-section .section-title { color: #FFF8F0; }
+        .pricing-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin-top: 48px;
+        }
+        .pricing-card {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 20px;
+          padding: 28px 24px;
+        }
+        .pricing-card.featured {
+          border-color: rgba(232,129,42,0.5);
+          background: rgba(232,129,42,0.07);
+          position: relative;
+        }
+        .featured-badge {
+          position: absolute;
+          top: -12px; left: 50%;
+          transform: translateX(-50%);
+          background: #E8812A;
+          color: white;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 14px;
+          border-radius: 12px;
+          letter-spacing: 0.5px;
+          white-space: nowrap;
+        }
+        .plan-name { font-size: 11px; color: #8870a8; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 14px; }
+        .plan-price { font-size: 36px; font-weight: 400; color: #FFF8F0; margin-bottom: 4px; letter-spacing: -1px; }
+        .plan-price sub { font-size: 15px; color: #7860a0; font-weight: 300; vertical-align: middle; }
+        .plan-features { margin-top: 20px; }
+        .plan-feature {
+          display: flex; align-items: center; gap: 10px;
+          font-size: 13px; color: #b09acc;
+          margin-bottom: 10px; font-weight: 300;
+        }
+        .plan-feature-check { color: #E8812A; font-size: 16px; }
+        .plan-btn {
+          width: 100%;
+          margin-top: 24px;
+          padding: 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.15);
+          background: transparent;
+          color: #c9b8d8;
+          font-size: 14px;
+          font-family: inherit;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .plan-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+        .plan-btn.featured-btn {
+          background: #E8812A;
+          border-color: #E8812A;
+          color: white;
+        }
+        .plan-btn.featured-btn:hover { background: #d4721f; }
+
+        .footer {
+          background: #0e0520;
+          padding: 32px 3rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .footer-logo { font-size: 16px; font-weight: 500; color: #6b5580; }
+        .footer-logo span { color: #E8812A; }
+        .footer-text { font-size: 12px; color: #4a3a60; }
+      `}</style>
+
+      {/* NAVBAR */}
+      <nav className="navbar">
+        <a className="logo" href="/">
+          <div className="logo-box">📖</div>
+          <div className="logo-wordmark">Kahani<span>yaan</span></div>
+        </a>
+        <div className="nav-links">
+          <a className="nav-link" href="#stories">Stories</a>
+          <a className="nav-link" href="#pricing">Pricing</a>
+          <a className="nav-link" href="/library">Library</a>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className="nav-signin">Sign in</button>
+            </SignInButton>
+          </Show>
+          <Show when="signed-in">
+            <SignInButton mode="modal">
+              <button className="nav-signin-filled">Account</button>
+            </SignInButton>
+          </Show>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-badge">✦ 10+ INDIAN LANGUAGES</div>
+        <h1 className="hero-title">
+          <span className="hero-title-line1">Bedtime stories where</span>
+          <span className="hero-title-line2">your child is the hero</span>
+        </h1>
+        <p className="hero-sub">
+          Personalized Indian bedtime stories rooted in Panchatantra, Birbal & Tenali Raman — in your mother tongue.
+        </p>
+        <div className="hero-btns">
+          <button className="btn-primary" onClick={() => document.getElementById("stories")?.scrollIntoView({ behavior: "smooth" })}>
+            ✨ Create a free story
+          </button>
+          <button className="btn-ghost">See how it works</button>
+        </div>
+        <div className="lang-row">
+          {LANG_SCRIPTS.map((script) => (
+            <div className="lang-pill" key={script}>{script}</div>
+          ))}
         </div>
       </section>
 
-      {/* Error banner */}
+      {/* ERROR */}
       {error && (
-        <div className="max-w-3xl mx-auto px-4 pt-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 flex items-start gap-2">
-            <span className="shrink-0 mt-0.5">⚠️</span>
-            <span className="flex-1">{error}</span>
-            <button onClick={() => setError("")} className="text-red-400 hover:text-red-600 cursor-pointer bg-transparent border-none shrink-0">✕</button>
+        <div style={{ maxWidth: 1160, margin: "16px auto 0", padding: "0 3rem" }}>
+          <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: "12px 16px", fontSize: 14, color: "#b91c1c", display: "flex", alignItems: "flex-start", gap: 8 }}>
+            <span>⚠️</span>
+            <span style={{ flex: 1 }}>{error}</span>
+            <button onClick={() => setError("")} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 16 }}>✕</button>
           </div>
         </div>
       )}
 
-      {/* Generator */}
-      <section id="generator" className="max-w-[1100px] mx-auto px-4 md:px-8 py-16 md:py-20">
-        <div className="text-center mb-10">
-          <div className="text-xs tracking-[2px] text-[#E8812A] mb-2">✦ STORY GENERATOR</div>
-          <h2 className="text-2xl md:text-[28px] font-medium text-[#1a0a2e]">Create your child&apos;s story</h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* Form */}
-          <div className="bg-white rounded-[20px] p-7 border border-[#f0e0d0]">
-            <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#f5ece0]">
-              <div className="w-9 h-9 bg-[#fff0e0] rounded-[10px] flex items-center justify-center text-[#E8812A] text-lg">
-                ✏️
+      {/* STORY GENERATOR */}
+      <section id="stories" className="generator-section">
+        <div className="section-eyebrow">✦ STORY GENERATOR</div>
+        <h2 className="section-title">Create your child's story</h2>
+        <div className="generator-grid">
+          {/* FORM */}
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-header-icon">✏️</div>
+              <div>
+                <div className="form-header-title">Tell us about your child</div>
+                <div className="form-header-sub">We'll make them the hero</div>
               </div>
-              <span className="text-base font-medium text-[#1a0a2e]">Tell us about your child</span>
             </div>
 
-            <div className="mb-5">
-              <label className="block text-[11px] font-semibold text-[#888] tracking-[0.5px] mb-2">CHILD&apos;S NAME</label>
+            <div className="field">
+              <label className="field-label">Child's Name</label>
               <input
+                className="name-input"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 border border-[#ede0d4] rounded-xl text-sm text-[#1a0a2e] bg-[#fffaf6] outline-none focus:border-[#E8812A] transition-colors"
+                placeholder="Enter name"
+                value={childName}
+                maxLength={20}
+                onChange={(e) => setChildName(e.target.value)}
               />
             </div>
 
-            <div className="mb-5">
-              <label className="block text-[11px] font-semibold text-[#888] tracking-[0.5px] mb-2">AGE GROUP</label>
-              <ChipGroup items={ages} value={age} onChange={setAge} />
+            <div className="field">
+              <label className="field-label">Age Group</label>
+              <div className="chips">
+                {AGE_GROUPS.map((age) => (
+                  <button
+                    key={age}
+                    className={`chip ${selectedAge === age ? "chip-age-active" : ""}`}
+                    onClick={() => setSelectedAge(age)}
+                  >{age}</button>
+                ))}
+              </div>
             </div>
 
-            <div className="mb-5">
-              <label className="block text-[11px] font-semibold text-[#888] tracking-[0.5px] mb-2">LANGUAGE</label>
-              <ChipGroup items={languages} value={language} onChange={setLanguage} />
+            <div className="field">
+              <label className="field-label">Language</label>
+              <div className="chips">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang}
+                    className={`chip ${selectedLang === lang ? "chip-lang-active" : ""}`}
+                    onClick={() => setSelectedLang(lang)}
+                  >{lang}</button>
+                ))}
+              </div>
             </div>
 
-            <div className="mb-5">
-              <label className="block text-[11px] font-semibold text-[#888] tracking-[0.5px] mb-2">THEME</label>
-              <ChipGroup items={themes as readonly string[]} value={theme} onChange={setTheme} variant="theme" />
+            <div className="field">
+              <label className="field-label">Theme</label>
+              <div className="chips">
+                {THEMES.map((theme) => (
+                  <button
+                    key={theme}
+                    className={`chip ${selectedTheme === theme ? "chip-theme-active" : ""}`}
+                    onClick={() => setSelectedTheme(theme)}
+                  >{theme}</button>
+                ))}
+              </div>
             </div>
 
-            <button
-              onClick={generateStory}
-              disabled={loading || !name.trim()}
-              className="w-full py-4 bg-[#1a0a2e] text-[#FFF8F0] border-none rounded-xl text-base cursor-pointer flex items-center justify-center gap-2.5 mt-1 disabled:opacity-50 hover:bg-[#2d1558] transition-colors"
-            >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <SparkleIcon />
-              )}
-              {loading ? "Weaving your story..." : `Generate ${name.trim()}'s story`}
+            <button className="generate-btn" disabled={loading} onClick={generateStory}>
+              <span className="spark">{loading ? "⏳" : "✨"}</span>
+              {loading ? "Weaving your story..." : `Generate ${childName ? `${childName}'s` : "your child's"} story`}
             </button>
           </div>
 
-          {/* Story Card */}
-          <div className="bg-[#1a0a2e] rounded-[20px] p-7 min-h-[400px] relative overflow-hidden">
+          {/* STORY DISPLAY */}
+          <div className="story-card">
             {!story && !loading && (
-              <div className="flex flex-col items-center justify-center h-full min-h-[360px] text-center gap-3">
-                <div className="text-4xl">📖</div>
-                <p className="text-sm text-[#9980bb] max-w-56">Fill in the details and tap generate to create your story</p>
+              <div className="story-empty">
+                <div className="story-empty-icon">📖</div>
+                <div className="story-empty-text">
+                  Fill in the details and click generate<br />to create your personalised story
+                </div>
               </div>
             )}
             {loading && (
-              <div className="flex flex-col items-center justify-center h-full min-h-[360px] gap-4">
-                <span className="loading loading-spinner loading-lg text-[#E8812A]" />
-                <p className="text-sm text-[#c9b8d8]">Weaving your story...</p>
+              <div className="story-empty">
+                <div className="story-empty-icon" style={{ opacity: 0.5 }}>⏳</div>
+                <div className="story-empty-text" style={{ color: "#8870a8" }}>
+                  Weaving your story...<br />One moment please
+                </div>
               </div>
             )}
-            {story && (
+            {story && !loading && (
               <>
-                <div className="flex items-center justify-between mb-5">
-                  <span className="inline-flex items-center px-3 py-1 text-[11px] bg-[rgba(232,129,42,0.2)] border border-[rgba(232,129,42,0.4)] text-[#f0a75b] rounded-full tracking-[0.5px]">
-                    ✦ {story.theme.toUpperCase()} · {story.language.toUpperCase()}
-                  </span>
-                  <span className="text-xs text-[#9980bb]">~{readingTime} min read</span>
+                <div className="story-top">
+                  <div className="story-tag">✦ {story.theme.toUpperCase()} · {story.language.toUpperCase()}</div>
+                  <div className="story-read-time">~{readingTime} min read</div>
                 </div>
-                <h3 className="text-xl md:text-[22px] font-medium text-[#FFF8F0] mb-4 leading-snug">
-                  <span className="text-[#E8812A]">{story.childName}</span> {story.title.replace(story.childName, "").trim()}
-                </h3>
-                <div className="text-sm leading-relaxed text-[#c9b8d8] whitespace-pre-line">
-                  {story.body}
+                <div className="story-title">
+                  <span className="name-highlight">{story.childName}</span> {story.title.replace(story.childName, "").trim()}
                 </div>
-                <hr className="border-none border-t border-[rgba(255,255,255,0.1)] my-5" />
-                <p className="text-xs text-[#9980bb] italic">
-                  <span className="text-[#f0a75b] not-italic font-medium">🪔 Seekh:</span> Always use your wit — the smartest answer wins.
-                </p>
-                <div className="flex gap-2.5 mt-5">
+                <div className="story-body" dangerouslySetInnerHTML={{ __html: story.body.replace(/\n/g, "<br/>") }} />
+                <hr className="story-divider" />
+                <div className="story-moral">
+                  <span className="moral-label">🪔 Seekh: </span>
+                  Always use your wit — the smartest answer wins.
+                </div>
+                <div className="story-actions">
                   <Show when="signed-in" fallback={
                     <SignInButton mode="modal">
-                      <button className="flex-1 py-2.5 rounded-[10px] border border-[rgba(255,255,255,0.15)] bg-transparent text-[#c9b8d8] text-xs cursor-pointer flex items-center justify-center gap-1.5 hover:bg-[rgba(255,255,255,0.05)] transition-colors">
-                        <BookmarkIcon /> Save
-                      </button>
+                      <button className="story-action">🔖 Save</button>
                     </SignInButton>
                   }>
-                    <button
-                      onClick={saveStory}
-                      disabled={saving || saved}
-                      className={`flex-1 py-2.5 rounded-[10px] border text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 ${
-                        saved
-                          ? "bg-[rgba(232,129,42,0.2)] border-[rgba(232,129,42,0.4)] text-[#f0a75b]"
-                          : "border-[rgba(255,255,255,0.15)] bg-transparent text-[#c9b8d8] hover:bg-[rgba(255,255,255,0.05)]"
-                      }`}
-                    >
-                      <BookmarkIcon /> {saved ? "Saved" : saving ? "Saving..." : "Save"}
+                    <button className="story-action" onClick={saveStory} disabled={saving || saved}>
+                      {saved ? "✅ Saved" : saving ? "⏳..." : "🔖 Save"}
                     </button>
                   </Show>
-                  <button className="flex-1 py-2.5 rounded-[10px] border border-[rgba(255,255,255,0.15)] bg-transparent text-[#c9b8d8] text-xs cursor-pointer flex items-center justify-center gap-1.5 hover:bg-[rgba(255,255,255,0.05)] transition-colors">
-                    <DownloadIcon /> PDF
-                  </button>
-                  <button onClick={() => { setStory(null); setError(""); }} className="flex-1 py-2.5 rounded-[10px] border border-[rgba(255,255,255,0.15)] bg-transparent text-[#c9b8d8] text-xs cursor-pointer flex items-center justify-center gap-1.5 hover:bg-[rgba(255,255,255,0.05)] transition-colors">
-                    <RefreshIcon /> New
-                  </button>
+                  <button className="story-action" onClick={() => window.print()}>⬇️ PDF</button>
+                  <button className="story-action" onClick={() => { setStory(null); setError(""); }}>🔄 New</button>
                 </div>
               </>
             )}
@@ -303,64 +735,82 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Themes */}
-      <section id="themes" className="max-w-[1100px] mx-auto px-4 md:px-8 pb-16 md:pb-20">
-        <div className="text-center mb-8">
-          <div className="text-xs tracking-[2px] text-[#E8812A] mb-2">✦ STORY THEMES</div>
-          <h2 className="text-2xl md:text-[28px] font-medium text-[#1a0a2e]">Rooted in Indian tradition</h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {[
-            { emoji: "🐘", name: "Panchatantra", count: "12 stories" },
-            { emoji: "👑", name: "Birbal", count: "8 stories" },
-            { emoji: "🎭", name: "Tenali Raman", count: "8 stories" },
-            { emoji: "🪔", name: "Festivals", count: "6 stories" },
-            { emoji: "⭐", name: "Moral Stories", count: "6 stories" },
-          ].map((t) => (
-            <div key={t.name} className="bg-white rounded-2xl p-5 text-center border border-[#f0e0d0] cursor-pointer hover:shadow-sm transition-shadow">
-              <div className="text-[28px] mb-2.5">{t.emoji}</div>
-              <div className="text-sm font-medium text-[#1a0a2e] mb-1">{t.name}</div>
-              <div className="text-[11px] text-[#aaa]">{t.count}</div>
+      {/* THEMES */}
+      <section className="themes-section">
+        <div className="section-eyebrow">✦ STORY THEMES</div>
+        <h2 className="section-title">Rooted in Indian tradition</h2>
+        <div className="themes-grid">
+          {THEMES.map((theme) => (
+            <div
+              className="theme-card"
+              key={theme}
+              onClick={() => {
+                setSelectedTheme(theme);
+                document.getElementById("stories")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <div className="theme-emoji">{THEME_ICONS[theme]}</div>
+              <div className="theme-name">{theme}</div>
+              <div className="theme-count">{THEME_COUNTS[theme]}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="bg-[#1a0a2e] px-4 md:px-8 py-16 md:py-20 text-center">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-xs tracking-[2px] text-[#f0a75b] mb-2">✦ PRICING</div>
-          <h2 className="text-2xl md:text-[28px] font-medium text-[#FFF8F0] mb-10">Simple, honest pricing</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-[800px] mx-auto">
-            {[
-              { plan: "FREE FOREVER", price: "₹0", period: "/ month", featured: false, features: ["3 stories/month", "All languages", "All themes"] },
-              { plan: "MONTHLY", price: "₹99", period: "/ month", featured: true, features: ["Unlimited stories", "Save to library", "PDF download"] },
-              { plan: "STORYBOOK", price: "₹499", period: "one-time", featured: false, features: ["Print-ready PDF", "Illustrated book", "Any story"] },
-            ].map((p) => (
-              <div
-                key={p.plan}
-                className={`rounded-2xl p-6 text-left ${
-                  p.featured
-                    ? "bg-[rgba(232,129,42,0.1)] border border-[#E8812A]"
-                    : "bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.12)]"
-                }`}
-              >
-                <div className="text-[11px] text-[#9980bb] tracking-[1px] mb-3">{p.plan}</div>
-                <div className="text-[28px] font-medium text-[#FFF8F0] mb-1">
-                  {p.price} <span className="text-sm text-[#9980bb] font-normal">{p.period}</span>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {p.features.map((f) => (
-                    <div key={f} className="flex items-center gap-2 text-sm text-[#c9b8d8]">
-                      <CheckIcon /> {f}
-                    </div>
-                  ))}
-                </div>
+      {/* PRICING */}
+      <section id="pricing" className="pricing-section">
+        <div className="pricing-inner">
+          <div className="section-eyebrow" style={{ color: "#f0a75b" }}>✦ PRICING</div>
+          <h2 className="section-title" style={{ color: "#FFF8F0" }}>Simple, honest pricing</h2>
+          <div className="pricing-grid">
+            <div className="pricing-card">
+              <div className="plan-name">FREE FOREVER</div>
+              <div className="plan-price">₹0 <sub>/ month</sub></div>
+              <div className="plan-features">
+                {["3 stories per month", "All languages", "All themes", "Read on screen"].map((f) => (
+                  <div className="plan-feature" key={f}>
+                    <span className="plan-feature-check">✓</span> {f}
+                  </div>
+                ))}
               </div>
-            ))}
+              <button className="plan-btn">Get started free</button>
+            </div>
+
+            <div className="pricing-card featured">
+              <div className="featured-badge">MOST POPULAR</div>
+              <div className="plan-name">MONTHLY</div>
+              <div className="plan-price">₹99 <sub>/ month</sub></div>
+              <div className="plan-features">
+                {["Unlimited stories", "Save to library", "PDF download", "Cancel anytime"].map((f) => (
+                  <div className="plan-feature" key={f}>
+                    <span className="plan-feature-check">✓</span> {f}
+                  </div>
+                ))}
+              </div>
+              <button className="plan-btn featured-btn">Start for ₹99</button>
+            </div>
+
+            <div className="pricing-card">
+              <div className="plan-name">STORYBOOK</div>
+              <div className="plan-price">₹499 <sub>one-time</sub></div>
+              <div className="plan-features">
+                {["Print-ready PDF", "Illustrated book", "Any story", "Gift it forever"].map((f) => (
+                  <div className="plan-feature" key={f}>
+                    <span className="plan-feature-check">✓</span> {f}
+                  </div>
+                ))}
+              </div>
+              <button className="plan-btn">Order storybook</button>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="footer-logo">Kahani<span>yaan</span></div>
+        <div className="footer-text">© 2026 Kahaniyaan · Made with ❤️ for Indian parents</div>
+      </footer>
     </div>
   );
 }
