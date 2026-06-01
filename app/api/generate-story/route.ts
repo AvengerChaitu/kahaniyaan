@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       const now = new Date();
       const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-      const { data: usage } = await supabase
+      const { data: usage } = await supabaseAdmin
         .from("user_usage")
         .select("*")
         .eq("clerk_user_id", userId)
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     const ageGroup = age.replace(" yrs", "");
 
     // Fetch matching stories from database
-    const { data: templates, error } = await supabase
+    const { data: templates, error } = await supabaseAdmin
       .from("story_templates")
       .select("*")
       .eq("language", language)
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       const now = new Date();
       const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-      const { data: existing } = await supabase
+      const { data: existing } = await supabaseAdmin
         .from("user_usage")
         .select("*")
         .eq("clerk_user_id", userId)
@@ -74,12 +74,12 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (existing) {
-        await supabase
+        await supabaseAdmin
           .from("user_usage")
           .update({ story_count: existing.story_count + 1, updated_at: new Date() })
           .eq("id", existing.id);
       } else {
-        await supabase
+        await supabaseAdmin
           .from("user_usage")
           .insert({ clerk_user_id: userId, story_count: 1, month, is_paid: false });
       }
