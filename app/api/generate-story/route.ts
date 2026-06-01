@@ -1,4 +1,4 @@
-import { openai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     const prompt = `Write a short, engaging bedtime story for a ${age}-year-old Indian child named ${name}. The story should be in ${language} and follow the theme of "${theme}". The child ${name} should be the hero of the story. The story should be culturally rooted in Indian traditions, values, and storytelling style. Keep it age-appropriate, warm, and moral-driven. Output the story with a title on the first line, then a blank line, then the story body. The title should be in English. The story body should be in ${language}.`;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 1000,
