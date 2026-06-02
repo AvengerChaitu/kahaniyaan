@@ -1,139 +1,84 @@
 "use client";
-
 import { useState } from "react";
-import { useUser, Show, SignInButton } from "@clerk/nextjs";
-import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 
 const LANGUAGES = ["Hindi", "Telugu", "Tamil", "Kannada", "Malayalam", "Marathi", "Bengali", "Gujarati", "Punjabi", "English"];
 const LANG_SCRIPTS = ["हिंदी", "తెలుగు", "தமிழ்", "ಕನ್ನಡ", "മലയാളം", "मराठी", "বাংলা", "ગુજરાતી", "ਪੰਜਾਬੀ", "English"];
 const AGE_GROUPS = ["3–4 yrs", "5–6 yrs", "7–8 yrs", "9–10 yrs"];
 const THEMES = ["Panchatantra", "Birbal", "Tenali Raman", "Festival", "Moral Story"];
-const THEME_ICONS: Record<string, string> = { Panchatantra: "🐘", Birbal: "👑", "Tenali Raman": "🎭", Festival: "🪔", "Moral Story": "⭐" };
-const THEME_COUNTS: Record<string, string> = { Panchatantra: "20 stories", Birbal: "20 stories", "Tenali Raman": "20 stories", Festival: "20 stories", "Moral Story": "20 stories" };
+const THEME_ICONS = { Panchatantra: "🐘", Birbal: "👑", "Tenali Raman": "🎭", Festival: "🪔", "Moral Story": "⭐" };
+const THEME_COUNTS = { Panchatantra: "12 stories", Birbal: "8 stories", "Tenali Raman": "8 stories", Festival: "6 stories", "Moral Story": "6 stories" };
 
-interface Story {
-  title: string;
-  body: string;
-  language: string;
-  theme: string;
-  age: string;
-  childName: string;
-}
+const SAMPLE_STORY = {
+  title: (name) => `${name} aur Chalak Bandar`,
+  tag: "PANCHATANTRA · HINDI",
+  readTime: "~4 min read",
+  body: (name) => `Ek sundar jungle mein, <b>${name}</b> naam ka ek sahasī bachcha rehta tha. Ek din, <b>${name}</b> jungle mein khelte-khelte ek ajeeb ped ke paas pahuncha jahan ek chalak bandar baitha tha.
+<br/><br/>
+Bandar ne kaha, "Arre <b>${name}</b>! Kya tum mujhse tez ho? Main tumhe ek paheli bataata hoon." <b>${name}</b> muskuraya aur bola, "Zaroor, batao!"
+<br/><br/>
+Bandar ne kaha, "Wo kaun si cheez hai jo sabke paas hoti hai, par koi usse dekh nahin sakta?" <b>${name}</b> ne thoda socha... aur phir bol utha — "Apni awaaz!"`,
+  moral: "Dimag ka istemal karo, mushkil se mushkil sawaal ka jawab mil jaata hai.",
+};
 
 export default function KahaniyanLanding() {
-  const { isSignedIn } = useUser();
   const [childName, setChildName] = useState("Arjun");
   const [selectedAge, setSelectedAge] = useState("5–6 yrs");
   const [selectedLang, setSelectedLang] = useState("Hindi");
   const [selectedTheme, setSelectedTheme] = useState("Panchatantra");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [story, setStory] = useState<Story | null>(null);
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [showComing, setShowComing] = useState("");
+  const [showStory, setShowStory] = useState(false);
+  const [storyName, setStoryName] = useState("Arjun");
 
-  const tts = useSpeechSynthesis();
-
-  async function generateStory() {
-    if (!childName.trim()) return;
-    setLoading(true);
-    setStory(null);
-    setSaved(false);
-    setError("");
-
-    try {
-      const ageValue = selectedAge.replace(" yrs", "");
-      const res = await fetch("/api/generate-story", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: childName.trim(), age: ageValue, language: selectedLang, theme: selectedTheme }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to generate story");
-      setStory({ title: data.title, body: data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim() });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function saveStory() {
-    if (!story || !isSignedIn) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/stories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: story.title,
-          body: story.body,
-          language: story.language,
-          theme: story.theme,
-          child_name: story.childName,
-          age: story.age,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save");
-      setSaved(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save story");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function downloadPDF() {
-    if (!story) return;
-    const win = window.open('', '_blank');
-    if (!win) return;
-    win.document.write(`
-      <html>
-        <head>
-          <title>${story.title} — Kahaniyaan</title>
-          <style>
-            body { font-family: 'Georgia', serif; max-width: 600px; margin: 60px auto; padding: 0 40px; color: #1a0a2e; line-height: 1.8; }
-            .story-header { border-bottom: 2px solid #E8812A; padding-bottom: 16px; margin-bottom: 32px; }
-            .story-tag { font-size: 11px; letter-spacing: 1.5px; color: #E8812A; font-weight: 600; margin-bottom: 10px; }
-            .story-title { font-size: 28px; font-weight: 600; color: #1a0a2e; margin: 0; }
-            .story-title span { color: #E8812A; }
-            .read-time { font-size: 12px; color: #999; margin-top: 6px; }
-            .story-body { font-size: 16px; line-height: 1.9; color: #2d1558; }
-            .story-body b { color: #E8812A; font-weight: 600; }
-            .moral { margin-top: 32px; padding: 16px 20px; background: #fff8f0; border-left: 4px solid #E8812A; font-style: italic; color: #7a5540; font-size: 14px; }
-            .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #ccc; border-top: 1px solid #eee; padding-top: 16px; }
-          </style>
-        </head>
-        <body>
-          <div class="story-header">
-            <div class="story-tag">✦ ${story.theme.toUpperCase()} · ${story.language.toUpperCase()}</div>
-            <h1 class="story-title"><span>${story.childName}</span> ${story.title.replace(story.childName, '').trim()}</h1>
-            <div class="read-time">~${readingTime} min read</div>
-          </div>
-          <div class="story-body">${story.body.replace(/\n/g, '<br/>')}</div>
-          <div class="moral">🪔 <strong>Seekh:</strong> Always use your wit — the smartest answer wins.</div>
-          <div class="footer">Generated with ❤️ on Kahaniyaan.vercel.app</div>
-        </body>
-      </html>
-    `);
-    win.document.close();
-    win.print();
-  }
-
-  const displayName = childName || "Arjun";
-  const readingTime = story ? Math.max(1, Math.ceil(story.body.split(/\s+/).length / 200)) : 0;
+  const handleGenerate = () => {
+    setStoryName(childName || "Arjun");
+    setShowStory(true);
+  };
 
   return (
     <div style={{ fontFamily: "'Sora', sans-serif", background: "#FFF8F0", minHeight: "100vh" }}>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Tiro+Devanagari+Hindi&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
 
-        .hero {
+        .navbar {
+          background: #150827;
+          padding: 0 3rem;
+          height: 64px;
           display: flex;
-          flex-direction: column;
           align-items: center;
+          justify-content: space-between;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-box {
+          width: 34px; height: 34px;
+          background: #E8812A;
+          border-radius: 9px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 17px;
+        }
+        .logo-wordmark { font-size: 19px; font-weight: 500; color: #FFF8F0; letter-spacing: 0.3px; }
+        .logo-wordmark span { color: #E8812A; }
+        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .nav-link { color: #a890c4; font-size: 14px; text-decoration: none; transition: color 0.2s; }
+        .nav-link:hover { color: #FFF8F0; }
+        .nav-signin {
+          background: transparent;
+          color: #FFF8F0;
+          border: 1px solid rgba(255,255,255,0.2);
+          padding: 8px 20px;
+          border-radius: 22px;
+          font-size: 14px;
+          cursor: pointer;
+          font-family: inherit;
+          transition: all 0.2s;
+        }
+        .nav-signin:hover { background: rgba(255,255,255,0.08); }
+
+        .hero {
           background: linear-gradient(160deg, #150827 0%, #2a1250 55%, #1a0d38 100%);
           padding: 72px 3rem 80px;
           text-align: center;
@@ -162,8 +107,6 @@ export default function KahaniyanLanding() {
           border-radius: 20px;
           margin-bottom: 28px;
           letter-spacing: 1.5px;
-          position: relative;
-          z-index: 2;
         }
         .hero-title {
           font-size: 52px;
@@ -171,8 +114,6 @@ export default function KahaniyanLanding() {
           line-height: 1.15;
           margin-bottom: 20px;
           letter-spacing: -1px;
-          position: relative;
-          z-index: 2;
         }
         .hero-title-line1 { color: #FFF8F0; display: block; }
         .hero-title-line2 { color: #E8812A; display: block; font-weight: 500; }
@@ -183,18 +124,8 @@ export default function KahaniyanLanding() {
           margin: 0 auto 40px;
           line-height: 1.7;
           font-weight: 300;
-          position: relative;
-          z-index: 2;
         }
-        .hero-btns {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-          flex-wrap: wrap;
-          margin-bottom: 52px;
-          position: relative;
-          z-index: 2;
-        }
+        .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 52px; }
         .btn-primary {
           background: #E8812A;
           color: white;
@@ -227,8 +158,6 @@ export default function KahaniyanLanding() {
           flex-wrap: wrap;
           justify-content: center;
           gap: 10px;
-          position: relative;
-          z-index: 2;
         }
         .lang-pill {
           background: rgba(255,255,255,0.06);
@@ -272,14 +201,11 @@ export default function KahaniyanLanding() {
         }
         @media (max-width: 768px) {
           .generator-grid { grid-template-columns: 1fr; }
-          .generator-section { padding: 60px 1.5rem; }
-          .hero-title { font-size: 36px; }
-          .hero { padding: 60px 1.5rem; }
-          .pricing-section { padding: 60px 1.5rem; }
-          .themes-section { padding: 0 1.5rem 60px; }
           .themes-grid { grid-template-columns: repeat(3, 1fr) !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
-          .footer { flex-direction: column; gap: 8px; padding: 24px 1.5rem; }
+          .hero-title { font-size: 36px; }
+          .navbar { padding: 0 1.5rem; }
+          .generator-section { padding: 60px 1.5rem; }
         }
 
         .form-card {
@@ -424,7 +350,6 @@ export default function KahaniyanLanding() {
           color: #b09acc;
           font-weight: 300;
         }
-        .story-body strong { color: #E8812A; font-weight: 500; }
         .story-divider {
           border: none;
           border-top: 1px solid rgba(255,255,255,0.08);
@@ -437,21 +362,16 @@ export default function KahaniyanLanding() {
           flex: 1;
           padding: 10px 8px;
           border-radius: 12px;
-          border: 1px solid rgba(232, 129, 42, 0.3);
-          background: rgba(232, 129, 42, 0.08);
-          color: #f0a75b;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.04);
+          color: #9880b8;
           font-size: 12px;
           font-family: inherit;
           cursor: pointer;
           display: flex; align-items: center; justify-content: center; gap: 6px;
           transition: all 0.15s;
-          letter-spacing: 0.3px;
         }
-        .story-action:hover {
-          background: rgba(232, 129, 42, 0.18);
-          color: #E8812A;
-          border-color: rgba(232, 129, 42, 0.5);
-        }
+        .story-action:hover { background: rgba(255,255,255,0.08); color: #FFF8F0; }
 
         .themes-section {
           padding: 0 3rem 80px;
@@ -463,9 +383,6 @@ export default function KahaniyanLanding() {
           grid-template-columns: repeat(5, 1fr);
           gap: 14px;
           margin-top: 48px;
-        }
-        @media (max-width: 600px) {
-          .themes-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
         .theme-card {
           background: white;
@@ -565,6 +482,20 @@ export default function KahaniyanLanding() {
         .footer-text { font-size: 12px; color: #4a3a60; }
       `}</style>
 
+      {/* NAVBAR */}
+      <nav className="navbar">
+        <a className="logo" href="#">
+          <div className="logo-box">📖</div>
+          <div className="logo-wordmark">Kahani<span>yaan</span></div>
+        </a>
+        <div className="nav-links">
+          <a className="nav-link" href="#stories">Stories</a>
+          <a className="nav-link" href="#pricing">Pricing</a>
+          <a className="nav-link" href="#">Library</a>
+          <button className="nav-signin">Sign in</button>
+        </div>
+      </nav>
+
       {/* HERO */}
       <section className="hero">
         <div className="hero-badge">✦ 10+ INDIAN LANGUAGES</div>
@@ -579,7 +510,7 @@ export default function KahaniyanLanding() {
           <button className="btn-primary" onClick={() => document.getElementById("stories")?.scrollIntoView({ behavior: "smooth" })}>
             ✨ Create a free story
           </button>
-          <button className="btn-ghost" onClick={() => document.getElementById("themes")?.scrollIntoView({ behavior: "smooth" })}>See how it works</button>
+          <button className="btn-ghost">See how it works</button>
         </div>
         <div className="lang-row">
           {LANG_SCRIPTS.map((script) => (
@@ -587,26 +518,6 @@ export default function KahaniyanLanding() {
           ))}
         </div>
       </section>
-
-      {/* ERROR / COMING SOON */}
-      {error && (
-        <div style={{ maxWidth: 1160, margin: "16px auto 0", padding: "0 3rem" }}>
-          <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: "12px 16px", fontSize: 14, color: "#b91c1c", display: "flex", alignItems: "flex-start", gap: 8 }}>
-            <span>⚠️</span>
-            <span style={{ flex: 1 }}>{error}</span>
-            <button onClick={() => setError("")} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 16 }}>✕</button>
-          </div>
-        </div>
-      )}
-      {showComing && (
-        <div style={{ maxWidth: 1160, margin: "16px auto 0", padding: "0 3rem" }}>
-          <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: "12px 16px", fontSize: 14, color: "#166534", display: "flex", alignItems: "flex-start", gap: 8 }}>
-            <span>🚀</span>
-            <span style={{ flex: 1 }}>{showComing}</span>
-            <button onClick={() => setShowComing("")} style={{ background: "none", border: "none", color: "#16a34a", cursor: "pointer", fontSize: 16 }}>✕</button>
-          </div>
-        </div>
-      )}
 
       {/* STORY GENERATOR */}
       <section id="stories" className="generator-section">
@@ -674,63 +585,43 @@ export default function KahaniyanLanding() {
               </div>
             </div>
 
-            <button className="generate-btn" disabled={loading} onClick={generateStory}>
-              <span className="spark">{loading ? "⏳" : "✨"}</span>
-              {loading ? "Weaving your story..." : `Generate ${childName ? `${childName}'s` : "your child's"} story`}
+            <button className="generate-btn" onClick={handleGenerate}>
+              <span className="spark">✨</span>
+              Generate {childName ? `${childName}'s` : "your child's"} story
             </button>
           </div>
 
           {/* STORY DISPLAY */}
           <div className="story-card">
-            {!story && !loading && (
+            {!showStory ? (
               <div className="story-empty">
                 <div className="story-empty-icon">📖</div>
                 <div className="story-empty-text">
                   Fill in the details and click generate<br />to create your personalised story
                 </div>
               </div>
-            )}
-            {loading && (
-              <div className="story-empty">
-                <div className="story-empty-icon" style={{ opacity: 0.5 }}>⏳</div>
-                <div className="story-empty-text" style={{ color: "#8870a8" }}>
-                  Weaving your story...<br />One moment please
-                </div>
-              </div>
-            )}
-            {story && !loading && (
+            ) : (
               <>
                 <div className="story-top">
-                  <div className="story-tag">✦ {story.theme.toUpperCase()} · {story.language.toUpperCase()}</div>
-                  <div className="story-read-time">~{readingTime} min read</div>
+                  <div className="story-tag">{SAMPLE_STORY.tag}</div>
+                  <div className="story-read-time">{SAMPLE_STORY.readTime}</div>
                 </div>
                 <div className="story-title">
-                  <span className="name-highlight">{story.childName}</span> {story.title.replace(story.childName, "").trim()}
+                  <span className="name-highlight">{storyName}</span> aur Chalak Bandar
                 </div>
-                <div className="story-body" dangerouslySetInnerHTML={{ __html: story.body.replace(/\n/g, "<br/>") }} />
+                <div
+                  className="story-body"
+                  dangerouslySetInnerHTML={{ __html: SAMPLE_STORY.body(storyName) }}
+                />
                 <hr className="story-divider" />
                 <div className="story-moral">
                   <span className="moral-label">🪔 Seekh: </span>
-                  Always use your wit — the smartest answer wins.
+                  {SAMPLE_STORY.moral}
                 </div>
                 <div className="story-actions">
-                  <Show when="signed-in" fallback={
-                    <SignInButton mode="modal">
-                      <button className="story-action">🔖 Save</button>
-                    </SignInButton>
-                  }>
-                    <button className="story-action" onClick={saveStory} disabled={saving || saved}>
-                      {saved ? "✅ Saved" : saving ? "⏳..." : "🔖 Save"}
-                    </button>
-                  </Show>
-                  <button className="story-action" onClick={downloadPDF}>⬇️ PDF</button>
-                  <button
-                    className="story-action"
-                    onClick={() => { if (tts.isSpeaking) tts.stop(); else tts.speak(story.body.replace(/<[^>]*>/g, ""), story.language); }}
-                  >
-                    {tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
-                  </button>
-                  <button className="story-action" onClick={() => { tts.stop(); setStory(null); setError(""); }}>🔄 New</button>
+                  <button className="story-action">🔖 Save</button>
+                  <button className="story-action">⬇️ PDF</button>
+                  <button className="story-action" onClick={() => setShowStory(false)}>🔄 New</button>
                 </div>
               </>
             )}
@@ -739,7 +630,7 @@ export default function KahaniyanLanding() {
       </section>
 
       {/* THEMES */}
-      <section id="themes" className="themes-section">
+      <section className="themes-section">
         <div className="section-eyebrow">✦ STORY THEMES</div>
         <h2 className="section-title">Rooted in Indian tradition</h2>
         <div className="themes-grid">
@@ -764,7 +655,7 @@ export default function KahaniyanLanding() {
       <section id="pricing" className="pricing-section">
         <div className="pricing-inner">
           <div className="section-eyebrow" style={{ color: "#f0a75b" }}>✦ PRICING</div>
-          <h2 className="section-title" style={{ color: "#FFF8F0" }}>Simple, honest pricing</h2>
+          <h2 className="section-title">Simple, honest pricing</h2>
           <div className="pricing-grid">
             <div className="pricing-card">
               <div className="plan-name">FREE FOREVER</div>
@@ -776,7 +667,7 @@ export default function KahaniyanLanding() {
                   </div>
                 ))}
               </div>
-              <button className="plan-btn" onClick={() => document.getElementById("stories")?.scrollIntoView({ behavior: "smooth" })}>Get started free</button>
+              <button className="plan-btn">Get started free</button>
             </div>
 
             <div className="pricing-card featured">
@@ -790,7 +681,7 @@ export default function KahaniyanLanding() {
                   </div>
                 ))}
               </div>
-              <button className="plan-btn featured-btn" onClick={() => setShowComing("Monthly plan — coming soon! 🚀")}>Start for ₹99</button>
+              <button className="plan-btn featured-btn">Start for ₹99</button>
             </div>
 
             <div className="pricing-card">
@@ -803,7 +694,7 @@ export default function KahaniyanLanding() {
                   </div>
                 ))}
               </div>
-              <button className="plan-btn" onClick={() => setShowComing("Storybook printing — coming soon! 🚀")}>Order storybook</button>
+              <button className="plan-btn">Order storybook</button>
             </div>
           </div>
         </div>

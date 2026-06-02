@@ -1,0 +1,523 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .page { background: #FFF8F0; min-height: 100vh; }
+
+  .navbar {
+    background: #1a0a2e;
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: #E8812A;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 500;
+    color: #FFF8F0;
+    letter-spacing: 0.5px;
+  }
+  .logo-text span { color: #E8812A; }
+  .nav-links {
+    display: flex; gap: 24px; align-items: center;
+  }
+  .nav-link { color: #c9b8d8; font-size: 14px; text-decoration: none; }
+  .nav-btn {
+    background: #E8812A;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .hero {
+    background: linear-gradient(160deg, #1a0a2e 0%, #2d1558 60%, #1a0a2e 100%);
+    padding: 60px 2rem 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(232,129,42,0.2);
+    border: 1px solid rgba(232,129,42,0.4);
+    color: #f0a75b;
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+  .hero-title {
+    font-size: 42px;
+    font-weight: 500;
+    color: #FFF8F0;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .hero-title span { color: #E8812A; }
+  .hero-sub {
+    font-size: 16px;
+    color: #c9b8d8;
+    max-width: 480px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: #E8812A;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: #FFF8F0;
+    border: 1px solid rgba(255,248,240,0.3);
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .lang-pills {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    margin-top: 40px;
+  }
+  .lang-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #e8d5ff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+
+  .generator-section {
+    padding: 60px 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-label {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #E8812A;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 500;
+    color: #1a0a2e;
+    margin-bottom: 40px;
+  }
+
+  .generator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .form-card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    border: 1px solid #f0e0d0;
+  }
+  .form-card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f5ece0;
+  }
+  .form-card-icon {
+    width: 36px; height: 36px;
+    background: #fff0e0;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #E8812A;
+    font-size: 18px;
+  }
+  .form-card-title { font-size: 16px; font-weight: 500; color: #1a0a2e; }
+
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .field input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #ede0d4;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #1a0a2e;
+    outline: none;
+    background: #fffaf6;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #e8d5c4;
+    background: white;
+    color: #7a5540;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .chip.active {
+    background: #1a0a2e;
+    border-color: #1a0a2e;
+    color: white;
+  }
+  .chip.theme-active {
+    background: #E8812A;
+    border-color: #E8812A;
+    color: white;
+  }
+
+  .generate-btn {
+    width: 100%;
+    padding: 16px;
+    background: #1a0a2e;
+    color: #FFF8F0;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 8px;
+  }
+  .generate-btn i { font-size: 20px; color: #E8812A; }
+
+  .story-card {
+    background: #1a0a2e;
+    border-radius: 20px;
+    padding: 28px;
+    color: #FFF8F0;
+    min-height: 400px;
+    position: relative;
+    overflow: hidden;
+  }
+  .story-card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .story-tag {
+    background: rgba(232,129,42,0.2);
+    border: 1px solid rgba(232,129,42,0.4);
+    color: #f0a75b;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .story-meta { font-size: 12px; color: #9980bb; }
+  .story-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #FFF8F0;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .story-title span { color: #E8812A; }
+  .story-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #c9b8d8;
+  }
+  .story-body strong { color: #E8812A; font-weight: 500; }
+  .story-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin: 20px 0;
+  }
+  .story-moral {
+    font-size: 13px;
+    color: #9980bb;
+    font-style: italic;
+  }
+  .story-moral span { color: #f0a75b; font-style: normal; }
+  .story-actions {
+    display: flex; gap: 10px; margin-top: 20px;
+  }
+  .story-action-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: #c9b8d8;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  .themes-section {
+    padding: 40px 2rem 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .theme-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    border: 1px solid #f0e0d0;
+    cursor: pointer;
+  }
+  .theme-emoji { font-size: 28px; margin-bottom: 10px; }
+  .theme-name { font-size: 13px; font-weight: 500; color: #1a0a2e; margin-bottom: 4px; }
+  .theme-count { font-size: 11px; color: #aaa; }
+
+  .pricing-section {
+    background: #1a0a2e;
+    padding: 60px 2rem;
+    text-align: center;
+  }
+  .pricing-section .section-title { color: #FFF8F0; }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 800px;
+    margin: 40px auto 0;
+  }
+  .pricing-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: left;
+  }
+  .pricing-card.featured {
+    border-color: #E8812A;
+    background: rgba(232,129,42,0.1);
+  }
+  .pricing-plan { font-size: 12px; color: #9980bb; letter-spacing: 1px; margin-bottom: 12px; }
+  .pricing-price { font-size: 28px; font-weight: 500; color: #FFF8F0; margin-bottom: 4px; }
+  .pricing-price span { font-size: 14px; color: #9980bb; font-weight: 400; }
+  .pricing-features { margin-top: 16px; }
+  .pricing-feature {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #c9b8d8;
+    margin-bottom: 8px;
+  }
+  .pricing-feature i { color: #E8812A; font-size: 16px; }
+</style>
+
+<div class="page">
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo-icon">📖</div>
+      <div class="logo-text">Kahani<span>yaan</span></div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="#">Stories</a>
+      <a class="nav-link" href="#">Languages</a>
+      <a class="nav-link" href="#">Pricing</a>
+      <button class="nav-btn">Sign in</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-badge">✦ 10+ INDIAN LANGUAGES</div>
+    <h1 class="hero-title">Bedtime stories where<br><span>your child is the hero</span></h1>
+    <p class="hero-sub">Personalized Indian bedtime stories rooted in Panchatantra, Birbal & Tenali Raman — in your mother tongue.</p>
+    <div class="hero-btns">
+      <button class="btn-primary"><i class="ti ti-sparkles" aria-hidden="true"></i> Create a free story</button>
+      <button class="btn-secondary">See how it works</button>
+    </div>
+    <div class="lang-pills">
+      <div class="lang-pill">हिंदी</div>
+      <div class="lang-pill">తెలుగు</div>
+      <div class="lang-pill">தமிழ்</div>
+      <div class="lang-pill">ಕನ್ನಡ</div>
+      <div class="lang-pill">മലയാളം</div>
+      <div class="lang-pill">मराठी</div>
+      <div class="lang-pill">বাংলা</div>
+      <div class="lang-pill">ગુજરાતી</div>
+      <div class="lang-pill">ਪੰਜਾਬੀ</div>
+      <div class="lang-pill">English</div>
+    </div>
+  </div>
+
+  <div class="generator-section">
+    <div class="section-label">✦ STORY GENERATOR</div>
+    <h2 class="section-title">Create your child's story</h2>
+    <div class="generator-grid">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon"><i class="ti ti-pencil" aria-hidden="true"></i></div>
+          <div class="form-card-title">Tell us about your child</div>
+        </div>
+
+        <div class="field">
+          <label>CHILD'S NAME</label>
+          <input type="text" value="Arjun" />
+        </div>
+
+        <div class="field">
+          <label>AGE GROUP</label>
+          <div class="chips">
+            <div class="chip">3–4 yrs</div>
+            <div class="chip active">5–6 yrs</div>
+            <div class="chip">7–8 yrs</div>
+            <div class="chip">9–10 yrs</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>LANGUAGE</label>
+          <div class="chips">
+            <div class="chip active">Hindi</div>
+            <div class="chip">Telugu</div>
+            <div class="chip">Tamil</div>
+            <div class="chip">Kannada</div>
+            <div class="chip">Malayalam</div>
+            <div class="chip">Marathi</div>
+            <div class="chip">Bengali</div>
+            <div class="chip">English</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>THEME</label>
+          <div class="chips">
+            <div class="chip theme-active">Panchatantra</div>
+            <div class="chip">Birbal</div>
+            <div class="chip">Tenali Raman</div>
+            <div class="chip">Festival</div>
+            <div class="chip">Moral Story</div>
+          </div>
+        </div>
+
+        <button class="generate-btn">
+          <i class="ti ti-sparkles" aria-hidden="true"></i>
+          Generate Arjun's story
+        </button>
+      </div>
+
+      <div class="story-card">
+        <div class="story-card-top">
+          <div class="story-tag">✦ PANCHATANTRA · HINDI</div>
+          <div class="story-meta">~4 min read</div>
+        </div>
+        <div class="story-title"><span>Arjun</span> aur Chalak Bandar</div>
+        <div class="story-body">
+          Ek sundar jungle mein, <strong>Arjun</strong> naam ka ek sahasī bachcha rehta tha. Ek din, <strong>Arjun</strong> jungle mein khelte-khelte ek ajeeb ped ke paas pahuncha jahan ek chalak bandar baitha tha.
+          <br><br>
+          Bandar ne kaha, "Arre <strong>Arjun</strong>! Kya tum mujhse tez ho? Main tumhe ek paheli bata-ta hoon." <strong>Arjun</strong> muskuraya aur bola, "Zaroor, batao!"
+          <br><br>
+          Bandar ne kaha, "Wo kaun si cheez hai jo sabke paas hoti hai, par koi usse dekh nahin sakta?" <strong>Arjun</strong> ne thoda socha... aur phir bol utha — "Apni awaaz!"
+        </div>
+        <hr class="story-divider">
+        <div class="story-moral">
+          <span>🪔 Seekh:</span> Dimag ka istemal karo, mushkil se mushkil sawaal ka jawab mil jaata hai.
+        </div>
+        <div class="story-actions">
+          <button class="story-action-btn"><i class="ti ti-bookmark" aria-hidden="true"></i> Save</button>
+          <button class="story-action-btn"><i class="ti ti-download" aria-hidden="true"></i> PDF</button>
+          <button class="story-action-btn"><i class="ti ti-refresh" aria-hidden="true"></i> New story</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="themes-section">
+    <div class="section-label">✦ STORY THEMES</div>
+    <h2 class="section-title">Rooted in Indian tradition</h2>
+    <div class="themes-grid">
+      <div class="theme-card">
+        <div class="theme-emoji">🐘</div>
+        <div class="theme-name">Panchatantra</div>
+        <div class="theme-count">12 stories</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-emoji">👑</div>
+        <div class="theme-name">Birbal</div>
+        <div class="theme-count">8 stories</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-emoji">🎭</div>
+        <div class="theme-name">Tenali Raman</div>
+        <div class="theme-count">8 stories</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-emoji">🪔</div>
+        <div class="theme-name">Festivals</div>
+        <div class="theme-count">6 stories</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-emoji">⭐</div>
+        <div class="theme-name">Moral Stories</div>
+        <div class="theme-count">6 stories</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pricing-section">
+    <div class="section-label" style="color:#f0a75b;">✦ PRICING</div>
+    <h2 class="section-title">Simple, honest pricing</h2>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-plan">FREE FOREVER</div>
+        <div class="pricing-price">₹0 <span>/ month</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> 3 stories/month</div>
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> All languages</div>
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> All themes</div>
+        </div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-plan">MONTHLY</div>
+        <div class="pricing-price">₹99 <span>/ month</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> Unlimited stories</div>
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> Save to library</div>
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> PDF download</div>
+        </div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-plan">STORYBOOK</div>
+        <div class="pricing-price">₹499 <span>one-time</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> Print-ready PDF</div>
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> Illustrated book</div>
+          <div class="pricing-feature"><i class="ti ti-check" aria-hidden="true"></i> Any story</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
