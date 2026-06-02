@@ -1,9 +1,10 @@
 "use client";
 
-import { useUser, Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { useUser, useClerk, Show, SignInButton, UserButton } from "@clerk/nextjs";
 
 export default function AccountPage() {
   const { isSignedIn, user } = useUser();
+  const { signOut } = useClerk();
 
   if (!isSignedIn) {
     return (
@@ -55,7 +56,7 @@ export default function AccountPage() {
       </div>
 
       <div className="flex justify-center pt-4">
-        <button className="text-xs text-[#bbb5aa] hover:text-[#8a8580] cursor-pointer">Log out</button>
+        <button className="text-xs text-[#bbb5aa] hover:text-[#8a8580] cursor-pointer" onClick={() => signOut({ redirectUrl: "/" })}>Log out</button>
       </div>
     </div>
   );
