@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { ClerkProvider, Show, SignInButton, UserButton, SignOutButton } from "@clerk/nextjs";
 import { Playfair_Display, Lora, Dancing_Script } from "next/font/google";
 import { useEffect, useState } from "react";
-import { BottomNav } from "./nav-client";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -48,7 +47,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <li><Link className="nav-link" href="/#themes">Themes</Link></li>
                 <li><Link className="nav-link" href="/#generator">Try it</Link></li>
                 <li><Link className="nav-link" href="/#pricing">Pricing</Link></li>
-                <li><Link className="nav-link" href="/library">Library</Link></li>
+                <li><Link className={`nav-link${pathname === "/" ? " active" : ""}`} href="/">Create</Link></li>
+                <li><Link className={`nav-link${pathname === "/library" ? " active" : ""}`} href="/library">Library</Link></li>
+                <li><Link className={`nav-link${pathname === "/account" ? " active" : ""}`} href="/account">Account</Link></li>
               </ul>
             )}
             {!isAuthPage && (
@@ -81,7 +82,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <a href="/#themes" onClick={() => setMenuOpen(false)}>Themes</a>
                 <a href="/#generator" onClick={() => setMenuOpen(false)}>Try it</a>
                 <a href="/#pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
+                <a href="/" onClick={() => setMenuOpen(false)}>Create</a>
                 <a href="/library" onClick={() => setMenuOpen(false)}>Library</a>
+                <a href="/account" onClick={() => setMenuOpen(false)}>Account</a>
                 <Show when="signed-out">
                   <SignInButton mode="modal">
                     <button onClick={() => setMenuOpen(false)}>Sign in</button>
@@ -93,7 +96,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">
             {children}
           </main>
-          {!isAuthPage && <BottomNav />}
         </ClerkProvider>
       </body>
     </html>

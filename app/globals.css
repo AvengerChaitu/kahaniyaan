@@ -145,6 +145,7 @@ input { transition: all 0.2s ease; }
   transition: color 0.25s;
 }
 .nav-link:hover { color: var(--amber-lt); text-shadow: 0 0 12px rgba(240,163,0,0.35); }
+.nav-link.active { color: var(--amber-lt); }
 .nav-btn {
   background: var(--amber);
   color: var(--brown);
