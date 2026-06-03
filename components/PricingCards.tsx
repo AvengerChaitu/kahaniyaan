@@ -48,7 +48,7 @@ export default function PricingCards({ onStartFree, onShowComing }: Props) {
           gap: "16px"
         }}>
           {plans.map(p => (
-            <div key={p.tier} style={{
+            <div key={p.tier} className="pricing-card magic-hover" style={{
               background: p.primary ? "rgba(240,163,0,0.08)" : "rgba(255,255,255,0.04)",
               border: p.primary ? "1px solid rgba(240,163,0,0.5)" : "1px solid rgba(255,255,255,0.09)",
               borderRadius: "22px", padding: "32px", position: "relative"
@@ -99,7 +99,7 @@ export default function PricingCards({ onStartFree, onShowComing }: Props) {
                     ? onShowComing("Storybook printing — coming soon! 🚀")
                     : onStartFree()
               }
-                className={p.primary ? "magic-hover" : ""}
+                className="magic-hover"
                 style={{
                   width: "100%", marginTop: "28px", padding: "13px",
                   borderRadius: "16px",
