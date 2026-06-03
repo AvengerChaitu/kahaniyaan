@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ClerkProvider, Show, SignInButton, UserButton, SignOutButton } from "@clerk/nextjs";
-import type { Metadata } from "next";
-import { Playfair_Display, Nunito } from "next/font/google";
+import { Playfair_Display, Lora, Dancing_Script } from "next/font/google";
+import { useEffect, useState } from "react";
+import { BottomNav } from "./nav-client";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -9,44 +13,65 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
 });
 
-const nunito = Nunito({
+const lora = Lora({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Kahaniyan — AI Stories for Indian Kids",
-  description: "Personalized Indian bedtime stories in 10+ languages",
-};
+const dancingScript = Dancing_Script({
+  variable: "--font-script",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 55);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <html lang="en" className={`${playfair.variable} ${nunito.variable}`}>
-      <body className="min-h-dvh flex flex-col bg-[#fdf7f0] font-sans antialiased">
+    <html lang="en" className={`${playfair.variable} ${lora.variable} ${dancingScript.variable}`}>
+      <body className="min-h-dvh flex flex-col bg-[#fdf4e3] font-sans antialiased">
         <ClerkProvider>
-          <nav className="navbar">
-            <Link className="logo" href="/">Kahani<span>yaan</span></Link>
-            <div className="nav-links">
-              <Link className="nav-link" href="/#stories">Themes</Link>
-              <Link className="nav-link" href="/#generator">Try it</Link>
-              <Link className="nav-link" href="/#pricing">Pricing</Link>
-              <Link className="nav-link" href="/library">Library</Link>
-              <Show when="signed-out">
-                <SignInButton mode="modal">
-                  <button className="nav-signin">Sign in</button>
-                </SignInButton>
-              </Show>
-              <Show when="signed-in">
-                <UserButton />
-                <SignOutButton redirectUrl="/">
-                  <button className="nav-signout">Sign out</button>
-                </SignOutButton>
-              </Show>
-            </div>
+          <nav className={`navbar${scrolled ? " solid" : ""}`}>
+            <Link className="logo" href="/">Dadi<em>ma</em></Link>
+            {!isAuthPage && (
+              <ul className="nav-links">
+                <li><Link className="nav-link" href="/#themes">Themes</Link></li>
+                <li><Link className="nav-link" href="/#generator">Try it</Link></li>
+                <li><Link className="nav-link" href="/#pricing">Pricing</Link></li>
+                <li><Link className="nav-link" href="/library">Library</Link></li>
+              </ul>
+            )}
+            {!isAuthPage && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <Show when="signed-out">
+                  <SignInButton mode="modal">
+                    <button className="nav-signin">Sign in</button>
+                  </SignInButton>
+                </Show>
+                <Show when="signed-in">
+                  <div className="nav-user-wrap">
+                    <UserButton />
+                    <SignOutButton redirectUrl="/">
+                      <button className="nav-signin" style={{ padding: "0.4rem 1rem", fontSize: "0.78rem" }}>
+                        Log out
+                      </button>
+                    </SignOutButton>
+                  </div>
+                </Show>
+              </div>
+            )}
           </nav>
-          <main className="flex-1 pt-[62px]">
+          <main className="flex-1">
             {children}
           </main>
+          {!isAuthPage && <BottomNav />}
         </ClerkProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser, Show, SignInButton } from "@clerk/nextjs";
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 interface Story {
   id: number;
@@ -36,13 +36,23 @@ export default function LibraryPage() {
 
   if (!isSignedIn) {
     return (
-      <div className="p-4">
-        <div className="bg-white border border-[#e2ddd4] rounded-xl p-8 text-center">
-          <div className="flex flex-col items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-10 text-[#bbb5aa]"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-            <p className="text-sm text-[#8a8580]">Sign in to view your story library</p>
+      <div className="p-4" style={{ maxWidth: "600px", margin: "80px auto 0" }}>
+        <div style={{
+          background: "white", border: "1px solid #ede0d4",
+          borderRadius: "28px", padding: "3rem 2rem", textAlign: "center"
+        }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "40px", height: "40px", color: "#bbb" }}><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            <p style={{ fontSize: "13px", color: "#8a8580" }}>Sign in to view your story library</p>
             <SignInButton mode="modal">
-              <button className="btn btn-sm bg-[#c17f2a] text-white hover:bg-[#a66c22] border-none">Sign in</button>
+              <button style={{
+                background: "var(--amber)", color: "var(--brown)", border: "none",
+                padding: "10px 24px", borderRadius: "50px", fontSize: "13px",
+                fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                boxShadow: "0 2px 12px rgba(240,163,0,0.3)"
+              }}>
+                Sign in
+              </button>
             </SignInButton>
           </div>
         </div>
@@ -52,32 +62,85 @@ export default function LibraryPage() {
 
   if (loading) {
     return (
-      <div className="p-4 flex justify-center pt-12">
-        <span className="loading loading-spinner loading-md text-[#c17f2a]" />
+      <div className="p-4 flex justify-center pt-24">
+        <span style={{
+          width: "28px", height: "28px", border: "3px solid #f2ddb8",
+          borderTopColor: "var(--amber)", borderRadius: "50%",
+          animation: "spin 0.8s linear infinite", display: "inline-block"
+        }} />
       </div>
     );
   }
 
   if (selectedStory) {
     return (
-      <div className="p-4">
-        <div className="bg-white border border-[#e2ddd4] rounded-xl p-5">
-          <button onClick={() => setSelectedStory(null)} className="text-xs text-[#bbb5aa] hover:text-[#1a1a1a] mb-3 flex items-center gap-1 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3.5"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      <div className="p-4" style={{ maxWidth: "720px", margin: "80px auto 0" }}>
+        <div style={{
+          background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
+          borderRadius: "28px", padding: "36px",
+          border: "1px solid rgba(255,255,255,0.06)"
+        }}>
+          <button onClick={() => setSelectedStory(null)} style={{
+            color: "#8870a8", fontSize: "12px", cursor: "pointer",
+            display: "flex", alignItems: "center", gap: "4px",
+            background: "none", border: "none", fontFamily: "inherit",
+            marginBottom: "16px"
+          }}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "14px", height: "14px" }}><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
             Back to library
           </button>
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            <span className="px-2.5 py-1 text-xs rounded-full bg-[#fdf3e3] border border-[#e8c882] text-[#7a4f10]">{selectedStory.language}</span>
-            <span className="px-2.5 py-1 text-xs rounded-full bg-[#fdf3e3] border border-[#e8c882] text-[#7a4f10]">{selectedStory.theme}</span>
-            <span className="px-2.5 py-1 text-xs rounded-full bg-[#fdf3e3] border border-[#e8c882] text-[#7a4f10]">{selectedStory.child_name} · {selectedStory.age} yrs</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "16px" }}>
+            <span style={{
+              background: "rgba(240,163,0,0.18)", border: "1px solid rgba(240,163,0,0.35)",
+              color: "#f0a75b", fontSize: "10px", fontWeight: 800,
+              padding: "4px 12px", borderRadius: "999px"
+            }}>
+              {selectedStory.language}
+            </span>
+            <span style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              color: "#9b86c2", fontSize: "10px", fontWeight: 700,
+              padding: "4px 10px", borderRadius: "999px"
+            }}>
+              {selectedStory.theme}
+            </span>
+            <span style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              color: "#6b5580", fontSize: "10px", fontWeight: 500,
+              padding: "4px 10px", borderRadius: "999px"
+            }}>
+              {selectedStory.child_name} · {selectedStory.age} yrs
+            </span>
           </div>
-          <h2 className="text-base font-medium text-[#1a1a1a] mb-2">{selectedStory.title}</h2>
-          <div className="text-sm text-[#5a5550] leading-relaxed whitespace-pre-line">{selectedStory.body}</div>
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#e2ddd4]">
-            <span className="text-xs text-[#bbb5aa]">{new Date(selectedStory.created_at).toLocaleDateString()}</span>
-            <button onClick={() => window.print()} className="text-xs px-3 py-1.5 rounded-lg border border-[#ddd8ce] text-[#8a8580] hover:border-[#c17f2a] flex items-center gap-1 cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              PDF
+          <h2 style={{
+            fontFamily: "'Playfair Display', serif", fontSize: "20px",
+            fontWeight: 700, color: "var(--cream)", marginBottom: "16px"
+          }}>
+            <span style={{ color: "var(--amber)" }}>{selectedStory.child_name}</span>{" "}
+            {selectedStory.title.replace(selectedStory.child_name, "").trim()}
+          </h2>
+          <div style={{
+            fontSize: "14px", lineHeight: 1.9, color: "#c0a8e0",
+            fontWeight: 300, whiteSpace: "pre-line"
+          }}>
+            {selectedStory.body}
+          </div>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            paddingTop: "16px", marginTop: "16px",
+            borderTop: "1px solid rgba(255,255,255,0.07)"
+          }}>
+            <span style={{ fontSize: "11px", color: "#6b5580" }}>
+              {new Date(selectedStory.created_at).toLocaleDateString()}
+            </span>
+            <button onClick={() => window.print()} style={{
+              fontSize: "11px", padding: "8px 16px", borderRadius: "999px",
+              border: "1px solid rgba(240,163,0,0.2)",
+              background: "rgba(240,163,0,0.05)", color: "#f0a75b",
+              cursor: "pointer", fontFamily: "inherit", fontWeight: 700,
+              display: "flex", alignItems: "center", gap: "4px"
+            }}>
+              ⬇️ PDF
             </button>
           </div>
         </div>
@@ -86,38 +149,76 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <h1 className="text-base font-medium text-[#1a1a1a]">Your stories</h1>
-        <span className="text-xs bg-[#ede8e0] text-[#8a8580] px-2.5 py-1 rounded-full">{stories.length} saved</span>
+    <div className="p-4" style={{ maxWidth: "800px", margin: "80px auto 0", paddingBottom: "80px" }}>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: "20px"
+      }}>
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif", fontSize: "24px",
+          fontWeight: 600, color: "var(--brown)"
+        }}>
+          Your stories
+        </h1>
+        <span style={{
+          background: "var(--parch)", color: "var(--brown3)", fontSize: "11px",
+          fontWeight: 600, padding: "4px 14px", borderRadius: "999px"
+        }}>
+          {stories.length} saved
+        </span>
       </div>
 
       {stories.length === 0 ? (
-        <div className="bg-white border border-dashed border-[#ddd8ce] rounded-xl p-8 text-center">
-          <p className="text-sm text-[#8a8580]">No stories saved yet. Generate a story and save it here!</p>
+        <div style={{
+          background: "white", border: "2px dashed #ede0d4",
+          borderRadius: "28px", padding: "3rem 2rem", textAlign: "center"
+        }}>
+          <div style={{ fontSize: "48px", opacity: 0.2, marginBottom: "12px" }}>📖</div>
+          <p style={{ fontSize: "13px", color: "#8a8580", fontStyle: "italic" }}>
+            No stories saved yet. Generate a story and save it here!
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))",
+          gap: "12px"
+        }}>
           {stories.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSelectedStory(s)}
-              className="bg-white border border-[#e2ddd4] rounded-xl p-4 text-left cursor-pointer hover:border-[#c17f2a] transition-all"
-            >
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#fdf3e3] border border-[#e8c882] text-[#7a4f10] inline-block mb-2 w-fit">
+            <button key={s.id} onClick={() => setSelectedStory(s)} style={{
+              background: "white", border: "1px solid #ede0d4",
+              borderRadius: "22px", padding: "20px", textAlign: "left",
+              cursor: "pointer", fontFamily: "inherit", width: "100%",
+              transition: "all 0.2s", display: "block"
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--amber)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#ede0d4"; e.currentTarget.style.transform = ""; }}>
+              <span style={{
+                fontSize: "10px", padding: "3px 10px", borderRadius: "999px",
+                background: "rgba(240,163,0,0.1)", border: "1px solid rgba(240,163,0,0.25)",
+                color: "var(--orange)", fontWeight: 700, display: "inline-block",
+                marginBottom: "10px"
+              }}>
                 {s.language} · {s.theme}
               </span>
-              <h3 className="text-sm font-medium text-[#1a1a1a] mb-1 line-clamp-1">{s.title}</h3>
-              <p className="text-xs text-[#8a8580] line-clamp-2">{s.body}</p>
-              <p className="text-xs text-[#bbb5aa] mt-2">{s.child_name} · {s.age} yrs</p>
+              <h3 style={{
+                fontSize: "14px", fontWeight: 700, color: "var(--brown)",
+                marginBottom: "6px", overflow: "hidden", textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}>
+                {s.title}
+              </h3>
+              <p style={{
+                fontSize: "12px", color: "#8a8580", lineHeight: 1.6,
+                overflow: "hidden", textOverflow: "ellipsis",
+                display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical"
+              }}>
+                {s.body}
+              </p>
+              <p style={{ fontSize: "11px", color: "#bbb", marginTop: "8px" }}>
+                {s.child_name} · {s.age} yrs
+              </p>
             </button>
           ))}
-          <div className="bg-[#ede8e0] border border-dashed border-[#ddd8ce] rounded-xl p-5 text-center flex items-center justify-center">
-            <div>
-              <p className="text-xs text-[#8a8580] mb-2">Upgrade to ₹99/month for unlimited saves</p>
-              <button className="btn btn-xs bg-[#fdf3e3] border-[#e8c882] text-[#7a4f10] hover:bg-[#f5e6c8]">Upgrade plan</button>
-            </div>
-          </div>
         </div>
       )}
     </div>

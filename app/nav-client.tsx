@@ -30,17 +30,26 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="btm-nav btm-nav-md border-t border-base-300 bg-base-100 z-50">
+    <nav className="btm-nav btm-nav-md z-50"
+      style={{
+        borderTop: "1px solid rgba(240,163,0,.12)",
+        background: "rgba(11,9,32,.96)",
+        backdropFilter: "blur(12px)",
+      }}>
       {tabs.map((tab) => {
         const isActive = pathname === tab.href;
         return (
           <Link
             key={tab.href}
             href={tab.href}
-            className={`${isActive ? "text-[#c17f2a] font-medium" : "text-base-content/60"}`}
-          >
+            className={`${isActive ? "text-[#f0a300]" : "text-[rgba(253,244,227,.5)]"}`}
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center",
+              gap: "2px", textDecoration: "none", padding: "8px 0",
+              transition: "color 0.2s"
+            }}>
             <TabIcon icon={tab.icon} />
-            <span className="btm-nav-label text-xs">{tab.label}</span>
+            <span style={{ fontSize: "11px", fontWeight: 600 }}>{tab.label}</span>
           </Link>
         );
       })}
