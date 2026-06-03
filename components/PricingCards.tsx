@@ -99,6 +99,7 @@ export default function PricingCards({ onStartFree, onShowComing }: Props) {
                     ? onShowComing("Storybook printing — coming soon! 🚀")
                     : onStartFree()
               }
+                className={p.primary ? "magic-hover" : ""}
                 style={{
                   width: "100%", marginTop: "28px", padding: "13px",
                   borderRadius: "16px",

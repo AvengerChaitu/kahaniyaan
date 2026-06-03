@@ -78,7 +78,7 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
           display: "flex", gap: "1rem", justifyContent: "center",
           flexWrap: "wrap", animationDelay: "0.8s"
         }}>
-          <button onClick={onCreateClick} className="btn-a" style={{
+          <button onClick={onCreateClick} className="magic-hover glow-btn" style={{
             background: "var(--amber)", color: "var(--brown)",
             padding: "0.9rem 2.3rem", borderRadius: "50px",
             fontFamily: "'Lora', serif", fontWeight: 500, fontSize: "1rem",

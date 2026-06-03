@@ -23,12 +23,10 @@ export default function Footer() {
       }}>
         {["About Us", "Stories", "Blog", "Privacy", "Contact"].map(l => (
           <li key={l}>
-            <a href="#" style={{
+            <a href="#" className="footer-link" style={{
               color: "rgba(253,244,227,.38)", fontSize: "0.82rem",
-              textDecoration: "none", transition: "color 0.25s"
-            }}
-              onMouseEnter={e => { e.currentTarget.style.color = "var(--amber)"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "rgba(253,244,227,.38)"; }}>
+              textDecoration: "none"
+            }}>
               {l}
             </a>
           </li>

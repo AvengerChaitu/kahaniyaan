@@ -139,7 +139,7 @@ export default function StoryForm({
         </div>
       </div>
 
-      <button className="gen-btn" disabled={loading || !childName.trim()} onClick={onGenerate}
+      <button className="gen-btn magic-hover" disabled={loading || !childName.trim()} onClick={onGenerate}
         style={{
           width: "100%", padding: "17px",
           background: loading || !childName.trim() ? "#d1c4e9" : "var(--brown)",

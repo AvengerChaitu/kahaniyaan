@@ -171,10 +171,7 @@ export default function HomePage() {
           What&apos;s your child&apos;s name?
         </h2>
 
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
-          gap: "28px", alignItems: "start"
-        }}>
+        <div className="generator-grid">
           <StoryForm
             childName={childName}
             selectedAge={selectedAge}

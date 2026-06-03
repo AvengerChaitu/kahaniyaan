@@ -25,6 +25,7 @@ const dancingScript = Dancing_Script({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
@@ -33,6 +34,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
 
   return (
     <html lang="en" className={`${playfair.variable} ${lora.variable} ${dancingScript.variable}`}>
@@ -49,21 +52,40 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </ul>
             )}
             {!isAuthPage && (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <Show when="signed-out">
+                    <SignInButton mode="modal">
+                      <button className="nav-signin">Sign in</button>
+                    </SignInButton>
+                  </Show>
+                  <Show when="signed-in">
+                    <div className="nav-user-wrap">
+                      <UserButton />
+                      <SignOutButton redirectUrl="/">
+                        <button className="nav-signin" style={{ padding: "0.4rem 1rem", fontSize: "0.78rem" }}>
+                          Log out
+                        </button>
+                      </SignOutButton>
+                    </div>
+                  </Show>
+                </div>
+                <button className={`hamburger-btn${menuOpen ? " open" : ""}`}
+                  onClick={() => setMenuOpen(v => !v)} aria-label="Menu">
+                  <span></span>
+                </button>
+              </>
+            )}
+            {menuOpen && (
+              <div className="mobile-overlay" onClick={() => setMenuOpen(false)}>
+                <a href="/#themes" onClick={() => setMenuOpen(false)}>Themes</a>
+                <a href="/#generator" onClick={() => setMenuOpen(false)}>Try it</a>
+                <a href="/#pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
+                <a href="/library" onClick={() => setMenuOpen(false)}>Library</a>
                 <Show when="signed-out">
                   <SignInButton mode="modal">
-                    <button className="nav-signin">Sign in</button>
+                    <button onClick={() => setMenuOpen(false)}>Sign in</button>
                   </SignInButton>
-                </Show>
-                <Show when="signed-in">
-                  <div className="nav-user-wrap">
-                    <UserButton />
-                    <SignOutButton redirectUrl="/">
-                      <button className="nav-signin" style={{ padding: "0.4rem 1rem", fontSize: "0.78rem" }}>
-                        Log out
-                      </button>
-                    </SignOutButton>
-                  </div>
                 </Show>
               </div>
             )}

@@ -31,15 +31,12 @@ export default function HowItWorks() {
           { n: "02", icon: "🌐", title: "Choose language &amp; theme", desc: "Pick from 10 Indian languages and 5 timeless themes like Panchatantra and Birbal." },
           { n: "03", icon: "📖", title: "Get a unique story", desc: "AI crafts a personalized tale in seconds, ready to read aloud or save for later." },
         ].map((s, i) => (
-          <div key={i} style={{
+          <div key={i} className="step-card magic-hover" style={{
             textAlign: "center", padding: "2.5rem 1.4rem",
             background: "var(--cream)", borderRadius: "22px",
             border: "1px solid rgba(224,106,26,.14)",
-            boxShadow: "0 3px 20px rgba(50,20,5,.06)",
-            transition: "transform 0.3s, box-shadow 0.3s"
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 14px 36px rgba(50,20,5,.12)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
+            boxShadow: "0 3px 20px rgba(50,20,5,.06)"
+          }}>
             <div style={{
               fontFamily: "'Playfair Display', serif", fontSize: "3.2rem",
               fontWeight: 700, color: "rgba(240,163,0,.18)", lineHeight: 1,

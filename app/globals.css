@@ -59,6 +59,10 @@
   0%,100% { opacity: 0.85; }
   50% { opacity: 1; transform: translateX(-50%) scaleX(1.06); }
 }
+@keyframes magicGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(240,163,0,0.15), 0 0 20px rgba(240,163,0,0.05); }
+  50% { box-shadow: 0 0 16px rgba(240,163,0,0.35), 0 0 40px rgba(240,163,0,0.12); }
+}
 
 .star { animation: twinkle var(--d,3s) ease-in-out infinite; animation-delay: var(--dl,0s); position: absolute; border-radius: 50%; background: white; pointer-events: none; }
 .floater { animation: float var(--d,4s) ease-in-out infinite; animation-delay: var(--delay,0s); }
@@ -72,6 +76,8 @@
 .fade-up { animation: fadeUp 0.65s ease-out both; }
 .story-line { animation: storyIn 0.5s ease-out both; }
 .moon { animation: mglow 4s ease-in-out infinite; }
+.magic-hover { transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.magic-hover:hover { animation: magicGlow 1.5s ease-in-out infinite; transform: translateY(-3px); }
 
 .lang-pill { transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); cursor: default; }
 .lang-pill:hover { transform: translateY(-3px) scale(1.05); border-color: var(--amber) !important; color: var(--amber-lt) !important; }
@@ -83,7 +89,16 @@
 .theme-card:hover { transform: translateY(-6px) scale(1.03); }
 
 .gen-btn { transition: all 0.2s ease; }
-.gen-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(11,9,32,0.55) !important; }
+.gen-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(240,163,0,0.35) !important; }
+
+.step-card { transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.story-card-glow { transition: border-color 0.3s ease; }
+.story-card-glow:hover { border-color: rgba(240,163,0,0.25) !important; }
+
+.footer-link { transition: color 0.25s; }
+.footer-link:hover { color: var(--amber) !important; }
+
+.generator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
 
 .action-btn { transition: all 0.2s ease; }
 .action-btn:hover { transform: translateY(-2px); background: rgba(240,163,0,0.15) !important; border-color: rgba(240,163,0,0.6) !important; }
@@ -161,7 +176,58 @@ input { transition: all 0.2s ease; }
 .nav-signin:hover { border-color: var(--amber); color: var(--amber-lt); }
 .nav-user-wrap { display: flex; align-items: center; gap: 0.75rem; }
 
+.hamburger-btn {
+  display: none; background: none; border: none; cursor: pointer;
+  width: 28px; height: 22px; position: relative;
+}
+.hamburger-btn span,
+.hamburger-btn span::before,
+.hamburger-btn span::after {
+  display: block; position: absolute; left: 0; width: 100%; height: 2px;
+  background: rgba(253,244,227,0.82); border-radius: 2px;
+  transition: all 0.3s;
+}
+.hamburger-btn span { top: 50%; transform: translateY(-50%); }
+.hamburger-btn span::before { content: ""; top: -8px; }
+.hamburger-btn span::after { content: ""; top: 8px; }
+.hamburger-btn.open span { background: transparent; }
+.hamburger-btn.open span::before { top: 0; transform: rotate(45deg); }
+.hamburger-btn.open span::after { top: 0; transform: rotate(-45deg); }
+
+.mobile-overlay {
+  position: fixed; inset: 0; z-index: 199;
+  background: rgba(11,9,32,0.97);
+  backdrop-filter: blur(14px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2rem; padding: 2rem;
+  animation: fadeUp 0.35s ease-out;
+}
+.mobile-overlay a {
+  color: rgba(253,244,227,0.82); text-decoration: none;
+  font-family: "'Playfair Display', serif"; font-size: 1.4rem;
+  letter-spacing: 0.06em; transition: color 0.25s;
+}
+.mobile-overlay a:hover { color: var(--amber-lt); }
+.mobile-overlay button {
+  background: var(--amber); color: var(--brown); border: none;
+  padding: 0.7rem 2.4rem; border-radius: 50px;
+  font-size: 1.1rem; font-weight: 700; cursor: pointer;
+  font-family: "'Lora', serif";
+}
+
 @media (max-width: 768px) {
   .navbar { padding: 1rem 1.2rem; }
-  .nav-link { display: none; }
+  ul.nav-links { display: none; }
+  .hamburger-btn { display: block; }
+  .generator-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nav-links { gap: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .navbar { padding: 0.7rem 0.9rem; }
+  footer ul { flex-direction: column; gap: 0.8rem; }
 }

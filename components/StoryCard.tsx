@@ -33,51 +33,51 @@ interface Props {
 export default function StoryCard({ story, loading, displayName, readingTime, saved, saving, tts, onSave, onPdf, onNew }: Props) {
   if (!story) {
     return (
+    <div className="story-card-glow" style={{
+      background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
+      borderRadius: "28px", padding: "36px", minHeight: "460px",
+      position: "relative", overflow: "hidden",
+      border: "1px solid rgba(255,255,255,0.06)",
+      boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
+    }}>
       <div style={{
-        background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
-        borderRadius: "28px", padding: "36px", minHeight: "460px",
-        position: "relative", overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
+        position: "absolute", top: "-60px", right: "-60px",
+        width: "250px", height: "250px",
+        background: "radial-gradient(circle,rgba(240,163,0,0.12) 0%,transparent 70%)",
+        pointerEvents: "none"
+      }} />
+      <div style={{
+        position: "absolute", bottom: "-40px", left: "-30px",
+        width: "200px", height: "200px",
+        background: "radial-gradient(circle,rgba(100,50,210,0.1) 0%,transparent 70%)",
+        pointerEvents: "none"
+      }} />
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", height: "380px", gap: "20px",
+        position: "relative", zIndex: 1
       }}>
-        <div style={{
-          position: "absolute", top: "-60px", right: "-60px",
-          width: "250px", height: "250px",
-          background: "radial-gradient(circle,rgba(240,163,0,0.12) 0%,transparent 70%)",
-          pointerEvents: "none"
-        }} />
-        <div style={{
-          position: "absolute", bottom: "-40px", left: "-30px",
-          width: "200px", height: "200px",
-          background: "radial-gradient(circle,rgba(100,50,210,0.1) 0%,transparent 70%)",
-          pointerEvents: "none"
-        }} />
-        <div style={{
-          display: "flex", flexDirection: "column", alignItems: "center",
-          justifyContent: "center", height: "380px", gap: "20px",
-          position: "relative", zIndex: 1
-        }}>
-          <div style={{ fontSize: "64px", opacity: 0.18, lineHeight: 1 }}>📖</div>
-          <div style={{ color: "#6b5580", fontSize: "14px", textAlign: "center", lineHeight: 1.8, fontWeight: 400 }}>
-            Fill in the details and click generate<br />to create your personalised story
-          </div>
-          <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                width: "7px", height: "7px", background: "var(--amber)",
-                borderRadius: "50%", animation: "twinkle 1.4s ease-in-out infinite",
-                animationDelay: `${i * 0.25}s`, opacity: 0.7
-              }} />
-            ))}
-          </div>
+        <div style={{ fontSize: "64px", opacity: 0.18, lineHeight: 1 }}>📖</div>
+        <div style={{ color: "#6b5580", fontSize: "14px", textAlign: "center", lineHeight: 1.8, fontWeight: 400 }}>
+          Fill in the details and click generate<br />to create your personalised story
+        </div>
+        <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              width: "7px", height: "7px", background: "var(--amber)",
+              borderRadius: "50%", animation: "twinkle 1.4s ease-in-out infinite",
+              animationDelay: `${i * 0.25}s`, opacity: 0.7
+            }} />
+          ))}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (loading) {
     return (
-      <div style={{
+      <div className="story-card-glow" style={{
         background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
         borderRadius: "28px", padding: "36px", minHeight: "460px",
         position: "relative", overflow: "hidden",
@@ -122,7 +122,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
   }
 
   return (
-    <div style={{
+    <div className="story-card-glow" style={{
       background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
       borderRadius: "28px", padding: "36px", minHeight: "460px",
       position: "relative", overflow: "hidden",
@@ -195,7 +195,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
         <div style={{ display: "flex", gap: "8px", marginTop: "22px", flexWrap: "wrap" }}>
           <Show when="signed-in" fallback={
             <SignInButton mode="modal">
-              <button className="action-btn" style={{
+              <button className="action-btn magic-hover" style={{
                 flex: 1, minWidth: "72px", borderRadius: "14px",
                 border: "1px solid rgba(240,163,0,0.2)",
                 background: "rgba(240,163,0,0.05)", color: "#f0a75b",
@@ -207,7 +207,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
               </button>
             </SignInButton>
           }>
-            <button className="action-btn" onClick={onSave} disabled={saving || saved}
+            <button className="action-btn magic-hover" onClick={onSave} disabled={saving || saved}
               style={{
                 flex: 1, minWidth: "72px", borderRadius: "14px",
                 border: "1px solid rgba(240,163,0,0.2)",
@@ -219,7 +219,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
               {saved ? "✅ Saved" : saving ? "⏳..." : "🔖 Save"}
             </button>
           </Show>
-          <button className="action-btn" onClick={onPdf}
+          <button className="action-btn magic-hover" onClick={onPdf}
             style={{
               flex: 1, minWidth: "72px", borderRadius: "14px",
               border: "1px solid rgba(240,163,0,0.2)",
@@ -230,7 +230,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
             }}>
             ⬇️ PDF
           </button>
-          <button className="action-btn"
+          <button className="action-btn magic-hover"
             onClick={() => { if (tts.isSpeaking) tts.stop(); else tts.speak(story.body.replace(/<[^>]*>/g, ""), story.language); }}
             style={{
               flex: 1, minWidth: "72px", borderRadius: "14px",
@@ -242,7 +242,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
             }}>
             {tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
           </button>
-          <button className="action-btn" onClick={onNew}
+          <button className="action-btn magic-hover" onClick={onNew}
             style={{
               flex: 1, minWidth: "72px", borderRadius: "14px",
               border: "1px solid rgba(240,163,0,0.2)",

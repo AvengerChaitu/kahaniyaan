@@ -30,7 +30,7 @@ export default function ThemesGrid({ themes, selectedTheme, themeData, onSelect 
         {themes.map(t => {
           const d = themeData[t];
           return (
-            <div key={t} className="theme-card"
+            <div key={t} className="theme-card magic-hover"
               onClick={() => onSelect(t)}
               style={{
                 background: selectedTheme === t ? d.bg : "white",
