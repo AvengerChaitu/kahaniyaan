@@ -48,7 +48,7 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
 
       <div className="hero-content" style={{
         position: "relative", zIndex: 10, textAlign: "center",
-        padding: "2rem 2rem 300px"
+        padding: "5rem 2rem 2rem"
       }}>
         <p className="fade-up" style={{
           fontFamily: "'Dancing Script', cursive", fontSize: "clamp(1rem,2.5vw,1.35rem)",
