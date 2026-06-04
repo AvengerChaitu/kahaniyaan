@@ -199,6 +199,7 @@ export default function HomePage() {
             saving={saving}
             tts={{
               isSpeaking: tts.isSpeaking,
+              isLoading: tts.isLoading,
               stop: tts.stop,
               speak: (text, lang) => tts.speak(text, lang),
             }}

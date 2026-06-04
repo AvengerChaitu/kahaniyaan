@@ -1,110 +1,96 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 
-const LANG_TO_BEST_VOICE: Record<string, (voices: SpeechSynthesisVoice[]) => SpeechSynthesisVoice | null> = {
-  Hindi: (vs) => vs.find((v) => v.lang.startsWith("hi")) || null,
-  Telugu: (vs) => vs.find((v) => v.lang.startsWith("te")) || null,
-  Tamil: (vs) => vs.find((v) => v.lang.startsWith("ta")) || null,
-  English: (vs) =>
-    vs.find((v) => v.lang.startsWith("en-IN")) ||
-    vs.find((v) => v.lang.startsWith("en-GB")) ||
-    vs.find((v) => v.lang.startsWith("en-US") && v.name.includes("Mark")) ||
-    vs.find((v) => v.lang.startsWith("en-US")) ||
-    null,
-};
-
-function pickVoice(language: string, voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  const finder = LANG_TO_BEST_VOICE[language] || LANG_TO_BEST_VOICE.English;
-  return finder(voices) || voices.find((v) => v.lang.startsWith(language.slice(0, 2))) || voices[0] || null;
-}
-
-function getLangTag(language: string): string {
-  const map: Record<string, string> = { Hindi: "hi-IN", Telugu: "te-IN", Tamil: "ta-IN", English: "en-US" };
-  return map[language] || "en-US";
-}
+const TTS_API_BASE = "https://Chaitanyadasari99-daadima.hf.space";
 
 export function useSpeechSynthesis() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [supported, setSupported] = useState(true);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const currentTextRef = useRef("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) {
-      setSupported(false);
-      return;
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
+  const onEndRef = useRef<(() => void) | null>(null);
+
+  const cleanup = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
     }
-    const synth = window.speechSynthesis;
-    const updateVoices = () => setVoices(synth.getVoices());
-    updateVoices();
-    synth.addEventListener("voiceschanged", updateVoices);
-    return () => synth.removeEventListener("voiceschanged", updateVoices);
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
+    setIsSpeaking(false);
+    setIsPaused(false);
   }, []);
 
   const speak = useCallback(
-    (text: string, language: string, onEnd?: () => void) => {
-      if (typeof window === "undefined" || !window.speechSynthesis) return;
-      const synth = window.speechSynthesis;
-      synth.cancel();
-      currentTextRef.current = text;
+    async (text: string, language: string, onEnd?: () => void) => {
+      cleanup();
+      setError(null);
+      setIsLoading(true);
 
-      const langTag = getLangTag(language);
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = langTag;
-      utterance.rate = 0.85;
-      utterance.pitch = 1.05;
-      utterance.volume = 1;
+      onEndRef.current = onEnd || null;
 
-      const selected = pickVoice(language, voices);
-      if (selected) utterance.voice = selected;
+      try {
+        const url = `${TTS_API_BASE}/tts?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(language)}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`TTS service error: ${res.statusText}`);
+        }
 
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onpause = () => setIsPaused(true);
-      utterance.onresume = () => setIsPaused(false);
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        setIsPaused(false);
-        utteranceRef.current = null;
-        onEnd?.();
-      };
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        setIsPaused(false);
-        utteranceRef.current = null;
-      };
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        blobUrlRef.current = audioUrl;
 
-      utteranceRef.current = utterance;
-      synth.speak(utterance);
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          cleanup();
+          onEndRef.current?.();
+        };
+        audio.onerror = () => {
+          setError("Audio playback failed");
+          cleanup();
+        };
+
+        await audio.play();
+        setIsSpeaking(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "TTS request failed");
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [voices]
+    [cleanup]
   );
 
   const pause = useCallback(() => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.pause();
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      setIsPaused(true);
     }
   }, []);
 
   const resume = useCallback(() => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.resume();
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current.play();
+      setIsPaused(false);
     }
   }, []);
 
   const stop = useCallback(() => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setIsSpeaking(false);
-    setIsPaused(false);
-    utteranceRef.current = null;
-  }, []);
+    cleanup();
+  }, [cleanup]);
 
   const togglePlay = useCallback(
     (text: string, language: string, onEnd?: () => void) => {
+      if (isLoading) return;
       if (isSpeaking && !isPaused) {
         pause();
       } else if (isPaused) {
@@ -113,8 +99,19 @@ export function useSpeechSynthesis() {
         speak(text, language, onEnd);
       }
     },
-    [isSpeaking, isPaused, speak, pause, resume]
+    [isLoading, isSpeaking, isPaused, speak, pause, resume]
   );
 
-  return { isSpeaking, isPaused, supported, speak, pause, resume, stop, togglePlay };
+  return {
+    isSpeaking,
+    isPaused,
+    isLoading,
+    error,
+    supported: true,
+    speak,
+    pause,
+    resume,
+    stop,
+    togglePlay,
+  };
 }

@@ -13,6 +13,7 @@ interface Story {
 
 interface TTSState {
   isSpeaking: boolean;
+  isLoading: boolean;
   stop: () => void;
   speak: (text: string, lang: string) => void;
 }
@@ -230,7 +231,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
             }}>
             ⬇️ PDF
           </button>
-          <button className="action-btn magic-hover"
+          <button className="action-btn magic-hover" disabled={tts.isLoading}
             onClick={() => { if (tts.isSpeaking) tts.stop(); else tts.speak(story.body.replace(/<[^>]*>/g, ""), story.language); }}
             style={{
               flex: 1, minWidth: "72px", borderRadius: "14px",
@@ -240,7 +241,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
               fontFamily: "inherit", fontWeight: 700,
               display: "flex", alignItems: "center", justifyContent: "center", gap: "5px"
             }}>
-            {tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
+            {tts.isLoading ? "⏳..." : tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
           </button>
           <button className="action-btn magic-hover" onClick={onNew}
             style={{

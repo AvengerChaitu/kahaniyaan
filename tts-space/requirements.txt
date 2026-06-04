@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+torch
+torchaudio
+soundfile
+nltk
+transformers
+accelerate
+git+https://github.com/huggingface/parler-tts.git
