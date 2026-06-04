@@ -241,7 +241,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
               fontFamily: "inherit", fontWeight: 700,
               display: "flex", alignItems: "center", justifyContent: "center", gap: "5px"
             }}>
-            {tts.isLoading ? "⏳..." : tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
+            {tts.isLoading ? "🎧..." : tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
           </button>
           <button className="action-btn magic-hover" onClick={onNew}
             style={{
