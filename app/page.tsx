@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
+import { getMoralLabel } from "@/lib/tts-terms";
 import HeroSection from "@/components/HeroSection";
 import FeelSection from "@/components/FeelSection";
 import StoryForm from "@/components/StoryForm";
@@ -29,10 +30,13 @@ const THEME_DATA: Record<string, { icon: string; color: string; desc: string; bg
 interface Story {
   title: string;
   body: string;
+  ttsBody: string;
   language: string;
   theme: string;
   age: string;
   childName: string;
+  moral?: string;
+  moralLabel?: string;
 }
 
 export default function HomePage() {
@@ -47,6 +51,7 @@ export default function HomePage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showComing, setShowComing] = useState("");
+  const [excludeIds, setExcludeIds] = useState<number[]>([]);
 
   const tts = useSpeechSynthesis();
 
@@ -62,11 +67,14 @@ export default function HomePage() {
       const res = await fetch("/api/generate-story", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: childName.trim(), age: ageValue, language: selectedLang, theme: selectedTheme }),
+        body: JSON.stringify({ name: childName.trim(), age: ageValue, language: selectedLang, theme: selectedTheme, excludeIds }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate story");
-      setStory({ title: data.title, body: data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim() });
+      setStory({ title: data.title, body: data.body, ttsBody: data.ttsBody || data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim(), moral: data.moral, moralLabel: getMoralLabel(selectedLang) });
+      if (data.templateId) {
+        setExcludeIds(prev => [data.templateId, ...prev].slice(0, 3));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -88,6 +96,7 @@ export default function HomePage() {
           theme: story.theme,
           child_name: story.childName,
           age: story.age,
+          moral: story.moral,
         }),
       });
       const data = await res.json();
@@ -128,7 +137,7 @@ export default function HomePage() {
             <div class="read-time">~${readingTime} min read</div>
           </div>
           <div class="story-body">${story.body.replace(/\n/g, '<br/>')}</div>
-          <div class="moral">🪔 <strong>Seekh:</strong> Always use your wit — the smartest answer wins.</div>
+          ${story.moral ? `<div class="moral">🪔 <strong>${getMoralLabel(story.language)}:</strong> ${story.moral}</div>` : ''}
           <div class="footer">Generated with ❤️ on Dadima</div>
         </body>
       </html>
@@ -138,7 +147,7 @@ export default function HomePage() {
   }
 
   const displayName = childName || "Arjun";
-  const readingTime = story ? Math.max(1, Math.ceil(story.body.split(/\s+/).length / 200)) : 0;
+  const readingTime = story ? Math.max(1, Math.ceil(story.body.split(/\s+/).length / 150)) : 0;
 
   return (
     <div style={{ fontFamily: "'Lora', serif", background: "var(--cream)", minHeight: "100vh" }}>

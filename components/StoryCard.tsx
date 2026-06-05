@@ -5,10 +5,13 @@ import { Show, SignInButton } from "@clerk/nextjs";
 interface Story {
   title: string;
   body: string;
+  ttsBody: string;
   language: string;
   theme: string;
   age: string;
   childName: string;
+  moral?: string;
+  moralLabel?: string;
 }
 
 interface TTSState {
@@ -184,14 +187,14 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
 
         <hr style={{ border: "none", borderTop: "1px solid rgba(255,255,255,0.07)", margin: "22px 0" }} />
 
-        <div className="story-line" style={{
+        {story.moral && <div className="story-line" style={{
           fontSize: "13px", color: "#8870a8", fontStyle: "italic", lineHeight: 1.6
         }}>
           <span style={{ color: "#f0a75b", fontStyle: "normal", fontWeight: 800 }}>
-            🪔 Seekh:{" "}
+            🪔 {story.moralLabel || "Moral"}:{" "}
           </span>
-          Always use your wit — the smartest answer wins.
-        </div>
+          {story.moral}
+        </div>}
 
         <div style={{ display: "flex", gap: "8px", marginTop: "22px", flexWrap: "wrap" }}>
           <Show when="signed-in" fallback={
@@ -232,7 +235,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
             ⬇️ PDF
           </button>
           <button className="action-btn magic-hover" disabled={tts.isLoading}
-            onClick={() => { if (tts.isSpeaking) tts.stop(); else tts.speak(story.body.replace(/<[^>]*>/g, ""), story.language); }}
+            onClick={() => { if (tts.isSpeaking) tts.stop(); else tts.speak((story.ttsBody || story.body).replace(/<[^>]*>/g, ""), story.language); }}
             style={{
               flex: 1, minWidth: "72px", borderRadius: "14px",
               border: "1px solid rgba(240,163,0,0.2)",

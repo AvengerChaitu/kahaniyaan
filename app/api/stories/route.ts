@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { title, body, language, theme, child_name, age } = await req.json();
+    const { title, body, language, theme, child_name, age, moral } = await req.json();
 
     const { data, error } = await supabase.from("stories").insert({
       clerk_user_id: userId,
@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
       theme,
       child_name,
       age,
+      moral,
     }).select().single();
 
     if (error) {

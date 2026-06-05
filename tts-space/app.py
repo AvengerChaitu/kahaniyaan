@@ -22,44 +22,44 @@ sampling_rate = 24000
 
 LANG_CONFIG = {
     "Hindi": {
-        "speaker": "Rohit",
-        "description": "Rohit speaks with a slightly high-pitched voice delivering his words at a slightly slow pace in a small, confined space with a touch of background noise and a quite monotone tone.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Telugu": {
-        "speaker": "Prakash",
-        "description": "Prakash speaks slowly in a low-pitched, calm voice, with a neutral tone, perfect for narration. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Tamil": {
-        "speaker": "Jaya",
-        "description": "Jaya speaks with a slightly low-pitched, quite monotone voice at a slightly faster-than-average pace in a confined space with very clear audio.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Kannada": {
-        "speaker": "Suresh",
-        "description": "Suresh speaks slowly in a low-pitched, calm voice, with a neutral tone, perfect for narration. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Malayalam": {
-        "speaker": "Anjali",
-        "description": "Anjali speaks with a low-pitched voice delivering her words at a fast pace and an animated tone, in a very spacious environment, accompanied by noticeable background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Marathi": {
-        "speaker": "Sunita",
-        "description": "Sunita speaks slowly in a calm, moderate-pitched voice, delivering the news with a neutral tone. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Bengali": {
-        "speaker": "Aditi",
-        "description": "Aditi speaks at a moderate pace and pitch, with a clear, neutral tone and no emotional emphasis. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Gujarati": {
-        "speaker": "Yash",
-        "description": "Yash speaks in a calm, moderate-pitched voice with a neutral tone. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "Punjabi": {
-        "speaker": "Divjot",
-        "description": "Divjot speaks in a calm, moderate-pitched voice with a neutral tone. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
     "English": {
-        "speaker": "Thoma",
-        "description": "Thoma speaks with a British accent at a moderate pace and pitch, with a clear, neutral tone. The recording is very high quality with no background noise.",
+        "speaker": "Grandma",
+        "description": "An elderly grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
     },
 }
 

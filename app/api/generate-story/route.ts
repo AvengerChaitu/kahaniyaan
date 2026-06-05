@@ -1,10 +1,11 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { getTerm } from "@/lib/tts-terms";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, age, language, theme } = await req.json();
+    const { name, age, language, theme, excludeIds } = await req.json();
 
     if (!name || !age || !language || !theme) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -16,7 +17,6 @@ export async function POST(req: NextRequest) {
       const user = await currentUser();
       const email = user?.emailAddresses?.[0]?.emailAddress;
 
-      // Bypass limit for test account
       const isTestUser = email === "dsrchaitu007@gmail.com";
 
       if (!isTestUser) {
@@ -39,16 +39,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Map UI age format to DB format
-    const ageGroup = age.replace(" yrs", "").replace("–", "-");
-
-    // Fetch matching stories from database
-    const { data: templates, error } = await supabaseAdmin
+    // Fetch matching stories (ignore age_group - all stories available for any age)
+    let query = supabaseAdmin
       .from("story_templates")
       .select("*")
       .eq("language", language)
-      .eq("age_group", ageGroup)
       .eq("theme", theme);
+
+    if (excludeIds && Array.isArray(excludeIds) && excludeIds.length > 0) {
+      query = query.not("id", "in", `(${excludeIds.join(",")})`);
+    }
+
+    const { data: templates, error } = await query;
 
     if (error) {
       console.error("Supabase error:", error);
@@ -68,6 +70,9 @@ export async function POST(req: NextRequest) {
     // Replace placeholders
     const title = template.title.replace(/\{childname\}/g, name);
     const body = template.body.replace(/\{childname\}/g, name);
+    const term = getTerm(language);
+    const ttsBody = template.body.replace(/\{childname\}/g, term);
+    const moral = template.moral || "";
 
     // Track usage for logged-in users
     if (userId) {
@@ -93,7 +98,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ title, body });
+    return NextResponse.json({ title, body, ttsBody, moral, templateId: template.id });
   } catch (error) {
     console.error("Story fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch story" }, { status: 500 });
