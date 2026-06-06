@@ -1,12 +1,4 @@
-@import "tailwindcss";
-@plugin "daisyui";
-
-@theme inline {
-  --font-sans: "Lora", serif;
-  --font-display: "Playfair Display", serif;
-  --font-script: "Dancing Script", cursive;
-}
-
+/* ===== DEFINE CSS VARIABLES FIRST ===== */
 :root {
   /* Night Sky Base */
   --night: #1a1428;
@@ -32,6 +24,16 @@
   --text-dark: #3d2817;
   --text-med: #5c4033;
   --text-light: #8b7355;
+}
+
+/* ===== THEN IMPORT TAILWIND ===== */
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme inline {
+  --font-sans: "Lora", serif;
+  --font-display: "Playfair Display", serif;
+  --font-script: "Dancing Script", cursive;
 }
 
 @keyframes twinkle {
@@ -291,7 +293,7 @@ input:focus {
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--night); }
-::-webkit-scrollbar-thumb { background: #3a2460; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--wood-dark); border-radius: 4px; }
 
 .navbar {
   position: fixed;
