@@ -22,7 +22,7 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
   return (
     <section id="hero" style={{
       position: "relative", minHeight: "100vh",
-      background: "radial-gradient(ellipse at 50% 95%,#2e1800 0%,#1a0c2e 28%,#0d0920 60%,#060514 100%)",
+      background: "radial-gradient(ellipse at 50% 95%, #5c3d2e 0%, #3d2817 20%, #1a1428 50%, #0f0c1a 100%)",
       overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center"
     }}>
       {stars.map(s => (
@@ -42,7 +42,7 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
       <div className="hero-glow" style={{
         position: "absolute", bottom: "-20px", left: "50%", transform: "translateX(-50%)",
         width: "680px", height: "420px",
-        background: "radial-gradient(ellipse at 50% 88%,rgba(240,163,0,0.52) 0%,rgba(224,106,26,0.28) 28%,transparent 65%)",
+        background: "radial-gradient(ellipse at 50% 88%, rgba(193,68,14,0.35) 0%, rgba(212,165,116,0.15) 28%, transparent 65%)",
         pointerEvents: "none"
       }} />
 
@@ -52,7 +52,7 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
       }}>
         <p className="fade-up" style={{
           fontFamily: "'Dancing Script', cursive", fontSize: "clamp(1rem,2.5vw,1.35rem)",
-          color: "var(--amber)", marginBottom: "0.9rem",
+          color: "#ffc857", marginBottom: "0.9rem",
           animationDelay: "0.2s"
         }}>
           ✦ &nbsp; Come beta, sit down &nbsp; ✦
@@ -78,22 +78,32 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
           display: "flex", gap: "1rem", justifyContent: "center",
           flexWrap: "wrap", animationDelay: "0.8s"
         }}>
-          <button onClick={onCreateClick} className="magic-hover glow-btn" style={{
-            background: "var(--amber)", color: "var(--brown)",
+          <button onClick={onCreateClick} className="warm-btn" style={{
             padding: "0.9rem 2.3rem", borderRadius: "50px",
             fontFamily: "'Lora', serif", fontWeight: 500, fontSize: "1rem",
-            border: "none", cursor: "pointer",
-            boxShadow: "0 4px 24px rgba(240,163,0,0.42)",
-            transition: "all 0.3s"
+            boxShadow: "0 6px 24px rgba(193,68,14,0.4)"
           }}>
             Create a Story
           </button>
-          <button onClick={onExploreClick} className="btn-b" style={{
-            background: "transparent", color: "rgba(253,244,227,0.82)",
+          <button onClick={onExploreClick} style={{
+            background: "transparent", color: "#f5deb3",
             padding: "0.9rem 2.3rem", borderRadius: "50px",
-            border: "1px solid rgba(253,244,227,0.28)",
+            border: "1.5px solid rgba(212,165,116,0.5)",
             fontFamily: "'Lora', serif", fontSize: "1rem", cursor: "pointer",
-            transition: "all 0.3s"
+            transition: "all 0.3s",
+            fontWeight: 500
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "rgba(193,68,14,0.8)";
+            e.currentTarget.style.color = "#ffc857";
+            e.currentTarget.style.background = "rgba(193,68,14,0.1)";
+            e.currentTarget.style.boxShadow = "0 4px 16px rgba(193,68,14,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "rgba(212,165,116,0.5)";
+            e.currentTarget.style.color = "#f5deb3";
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.boxShadow = "none";
           }}>
             Explore Stories →
           </button>

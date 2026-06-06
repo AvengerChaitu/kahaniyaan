@@ -25,25 +25,28 @@ export default function StoryForm({
 }: Props) {
   return (
     <div style={{
-      background: "white", borderRadius: "28px", padding: "36px",
-      border: "1px solid #ede0d4", boxShadow: "0 8px 40px rgba(240,163,0,0.07)"
+      background: "linear-gradient(135deg, #f5deb3 0%, #f4e4c1 50%, #ede5ce 100%)",
+      borderRadius: "16px", padding: "36px",
+      border: "3px solid #8b5a3c",
+      boxShadow: "0 12px 32px rgba(92,61,46,0.25), inset 0 1px 0 rgba(255,255,255,0.5)"
     }}>
       <div style={{
         display: "flex", alignItems: "center", gap: "14px",
         paddingBottom: "22px", marginBottom: "28px",
-        borderBottom: "1px solid #f5ece0"
+        borderBottom: "2px solid rgba(92,61,46,0.3)"
       }}>
         <div style={{
           width: "46px", height: "46px",
-          background: "linear-gradient(135deg,#fff3e6,#ffe4c4)",
-          borderRadius: "16px", display: "flex", alignItems: "center",
-          justifyContent: "center", fontSize: "22px", flexShrink: 0
+          background: "linear-gradient(135deg, #dc8033 0%, #c1440e 100%)",
+          borderRadius: "12px", display: "flex", alignItems: "center",
+          justifyContent: "center", fontSize: "22px", flexShrink: 0,
+          boxShadow: "0 4px 12px rgba(193,68,14,0.25)"
         }}>✏️</div>
         <div>
-          <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--brown)" }}>
+          <div style={{ fontSize: "15px", fontWeight: 800, color: "#3d2817" }}>
             About your child
           </div>
-          <div style={{ fontSize: "12px", color: "#bbb", marginTop: "3px", fontWeight: 400 }}>
+          <div style={{ fontSize: "12px", color: "#8b7355", marginTop: "3px", fontWeight: 400 }}>
             We&apos;ll make them the star of the story ✨
           </div>
         </div>
@@ -52,7 +55,7 @@ export default function StoryForm({
       <div style={{ marginBottom: "24px" }}>
         <label style={{
           display: "block", fontSize: "10px", fontWeight: 800,
-          color: "#ccc", letterSpacing: "1.5px", textTransform: "uppercase",
+          color: "#5c3d2e", letterSpacing: "1.5px", textTransform: "uppercase",
           marginBottom: "10px"
         }}>
           Child&apos;s Name
@@ -60,16 +63,27 @@ export default function StoryForm({
         <input type="text" placeholder="Enter name..." value={childName} maxLength={20}
           onChange={e => onNameChange(e.target.value)}
           style={{
-            width: "100%", padding: "13px 18px", border: "2px solid #ede0d4",
-            borderRadius: "16px", fontSize: "16px", color: "var(--brown)",
-            background: "#fffaf6", fontFamily: "inherit", fontWeight: 600
+            width: "100%", padding: "13px 18px", border: "2px solid rgba(139,90,60,0.3)",
+            borderRadius: "12px", fontSize: "16px", color: "#3d2817",
+            background: "rgba(255,255,255,0.6)", fontFamily: "inherit", fontWeight: 600,
+            transition: "all 0.2s ease"
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "#c1440e";
+            e.currentTarget.style.background = "rgba(255,255,255,0.9)";
+            e.currentTarget.style.boxShadow = "0 0 0 4px rgba(193,68,14,0.15)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "rgba(139,90,60,0.3)";
+            e.currentTarget.style.background = "rgba(255,255,255,0.6)";
+            e.currentTarget.style.boxShadow = "none";
           }}
         />
       </div>
 
       <div style={{ marginBottom: "24px" }}>
         <label style={{
-          display: "block", fontSize: "10px", fontWeight: 800, color: "#ccc",
+          display: "block", fontSize: "10px", fontWeight: 800, color: "#5c3d2e",
           letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "10px"
         }}>
           Age Group

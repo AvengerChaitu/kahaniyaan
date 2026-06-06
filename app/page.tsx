@@ -37,6 +37,7 @@ interface Story {
   childName: string;
   moral?: string;
   moralLabel?: string;
+  ttsUrl?: string;
 }
 
 export default function HomePage() {
@@ -71,7 +72,7 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate story");
-      setStory({ title: data.title, body: data.body, ttsBody: data.ttsBody || data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim(), moral: data.moral, moralLabel: getMoralLabel(selectedLang) });
+      setStory({ title: data.title, body: data.body, ttsBody: data.ttsBody || data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim(), moral: data.moral, moralLabel: getMoralLabel(selectedLang), ttsUrl: data.ttsUrl || undefined });
       if (data.templateId) {
         setExcludeIds(prev => [data.templateId, ...prev].slice(0, 3));
       }
@@ -118,16 +119,16 @@ export default function HomePage() {
         <head>
           <title>${story.title} — Dadima</title>
           <style>
-            body { font-family: 'Georgia', serif; max-width: 600px; margin: 60px auto; padding: 0 40px; color: #1a0a2e; line-height: 1.8; }
-            .story-header { border-bottom: 2px solid #f0a300; padding-bottom: 16px; margin-bottom: 32px; }
-            .story-tag { font-size: 11px; letter-spacing: 1.5px; color: #f0a300; font-weight: 600; margin-bottom: 10px; }
-            .story-title { font-size: 28px; font-weight: 600; color: #1a0a2e; margin: 0; }
-            .story-title span { color: #f0a300; }
-            .read-time { font-size: 12px; color: #999; margin-top: 6px; }
-            .story-body { font-size: 16px; line-height: 1.9; color: #2d1558; }
-            .story-body b { color: #f0a300; font-weight: 600; }
-            .moral { margin-top: 32px; padding: 16px 20px; background: #fff8f0; border-left: 4px solid #f0a300; font-style: italic; color: #7a5540; font-size: 14px; }
-            .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #ccc; border-top: 1px solid #eee; padding-top: 16px; }
+            body { font-family: 'Georgia', serif; max-width: 600px; margin: 60px auto; padding: 0 40px; color: #3d2817; line-height: 1.8; }
+            .story-header { border-bottom: 3px solid #c1440e; padding-bottom: 16px; margin-bottom: 32px; }
+            .story-tag { font-size: 11px; letter-spacing: 1.5px; color: #c1440e; font-weight: 600; margin-bottom: 10px; }
+            .story-title { font-size: 28px; font-weight: 600; color: #3d2817; margin: 0; }
+            .story-title span { color: #c1440e; }
+            .read-time { font-size: 12px; color: #8b7355; margin-top: 6px; }
+            .story-body { font-size: 16px; line-height: 1.9; color: #3d2817; }
+            .story-body b { color: #c1440e; font-weight: 600; }
+            .moral { margin-top: 32px; padding: 16px 20px; background: #f5deb3; border-left: 4px solid #c1440e; font-style: italic; color: #5c3d2e; font-size: 14px; }
+            .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #999; border-top: 1px solid #ddd; padding-top: 16px; }
           </style>
         </head>
         <body>
@@ -150,7 +151,12 @@ export default function HomePage() {
   const readingTime = story ? Math.max(1, Math.ceil(story.body.split(/\s+/).length / 150)) : 0;
 
   return (
-    <div style={{ fontFamily: "'Lora', serif", background: "var(--cream)", minHeight: "100vh" }}>
+    <div style={{
+      fontFamily: "'Lora', serif",
+      background: "linear-gradient(180deg, var(--night) 0%, var(--night2) 50%, var(--night) 100%)",
+      minHeight: "100vh",
+      color: "var(--text-dark)"
+    }}>
       <HeroSection
         onExploreClick={() => document.getElementById("themes")?.scrollIntoView({ behavior: "smooth" })}
         onCreateClick={() => document.getElementById("generator")?.scrollIntoView({ behavior: "smooth" })}
@@ -167,7 +173,7 @@ export default function HomePage() {
 
       <section id="generator" style={{ padding: "88px 24px", maxWidth: "1120px", margin: "0 auto" }}>
         <p style={{
-          textAlign: "center", color: "var(--amber)", fontSize: "11px",
+          textAlign: "center", color: "var(--rust-light)", fontSize: "11px",
           letterSpacing: "2.5px", fontWeight: 700, marginBottom: "10px"
         }}>
           ✦ STORY GENERATOR
@@ -175,7 +181,7 @@ export default function HomePage() {
         <h2 style={{
           textAlign: "center", fontFamily: "'Playfair Display', serif",
           fontSize: "clamp(26px,3.5vw,40px)", fontWeight: 600,
-          color: "var(--brown)", marginBottom: "52px", lineHeight: 1.25
+          color: "var(--cream)", marginBottom: "52px", lineHeight: 1.25
         }}>
           What&apos;s your child&apos;s name?
         </h2>
@@ -230,7 +236,7 @@ export default function HomePage() {
 
       <div className="paisley-divider" style={{
         textAlign: "center", padding: "1.2rem 0", fontSize: "1.1rem",
-        color: "rgba(240,163,0,.5)", letterSpacing: "0.5rem"
+        color: "rgba(212,165,116,.5)", letterSpacing: "0.5rem"
       }}>
         — ✦ —
       </div>

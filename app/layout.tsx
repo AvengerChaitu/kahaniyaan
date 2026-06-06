@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" className={`${playfair.variable} ${lora.variable} ${dancingScript.variable}`}>
-      <body className="min-h-dvh flex flex-col bg-[#fdf4e3] font-sans antialiased">
+      <body className="min-h-dvh flex flex-col bg-[#1a1428] font-sans antialiased">
         <ClerkProvider>
           <nav className={`navbar${scrolled ? " solid" : ""}`}>
             <Link className="logo" href="/">Dadi<em>ma</em></Link>

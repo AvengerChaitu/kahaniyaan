@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { Show, SignInButton } from "@clerk/nextjs";
 
 interface Story {
@@ -12,6 +13,7 @@ interface Story {
   childName: string;
   moral?: string;
   moralLabel?: string;
+  ttsUrl?: string;
 }
 
 interface TTSState {
@@ -35,25 +37,50 @@ interface Props {
 }
 
 export default function StoryCard({ story, loading, displayName, readingTime, saved, saving, tts, onSave, onPdf, onNew }: Props) {
+  const [directPlaying, setDirectPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  function playDirect(url: string) {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.onended = () => setDirectPlaying(false);
+    audio.onerror = () => setDirectPlaying(false);
+    audio.play().then(() => setDirectPlaying(true)).catch(() => setDirectPlaying(false));
+  }
+
+  function stopDirect() {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
+    setDirectPlaying(false);
+  }
+
+  useEffect(() => { return () => { stopDirect(); }; }, []);
+
+  function handleRead() {
+    if (directPlaying) { stopDirect(); return; }
+    if (story?.ttsUrl) { playDirect(story.ttsUrl); return; }
+    if (tts.isSpeaking) tts.stop();
+    else tts.speak((story?.ttsBody || story?.body || "").replace(/<[^>]*>/g, ""), story?.language || "Hindi");
+  }
   if (!story) {
     return (
     <div className="story-card-glow" style={{
-      background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
+      background: "linear-gradient(140deg, rgba(245,222,179,0.08) 0%, rgba(212,165,116,0.06) 60%, rgba(245,222,179,0.04) 100%)",
       borderRadius: "28px", padding: "36px", minHeight: "460px",
       position: "relative", overflow: "hidden",
-      border: "1px solid rgba(255,255,255,0.06)",
-      boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
+      border: "2px solid rgba(212,165,116,0.25)",
+      boxShadow: "inset 0 0 30px rgba(0,0,0,0.2), 0 8px 24px rgba(193,68,14,0.15)"
     }}>
       <div style={{
         position: "absolute", top: "-60px", right: "-60px",
         width: "250px", height: "250px",
-        background: "radial-gradient(circle,rgba(240,163,0,0.12) 0%,transparent 70%)",
+        background: "radial-gradient(circle,rgba(193,68,14,0.1) 0%,transparent 70%)",
         pointerEvents: "none"
       }} />
       <div style={{
         position: "absolute", bottom: "-40px", left: "-30px",
         width: "200px", height: "200px",
-        background: "radial-gradient(circle,rgba(100,50,210,0.1) 0%,transparent 70%)",
+        background: "radial-gradient(circle,rgba(212,165,116,0.08) 0%,transparent 70%)",
         pointerEvents: "none"
       }} />
       <div style={{
@@ -82,22 +109,22 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
   if (loading) {
     return (
       <div className="story-card-glow" style={{
-        background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
+        background: "linear-gradient(140deg, rgba(245,222,179,0.08) 0%, rgba(212,165,116,0.06) 60%, rgba(245,222,179,0.04) 100%)",
         borderRadius: "28px", padding: "36px", minHeight: "460px",
         position: "relative", overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
+        border: "2px solid rgba(212,165,116,0.25)",
+        boxShadow: "inset 0 0 30px rgba(0,0,0,0.2), 0 8px 24px rgba(193,68,14,0.15)"
       }}>
         <div style={{
           position: "absolute", top: "-60px", right: "-60px",
           width: "250px", height: "250px",
-          background: "radial-gradient(circle,rgba(240,163,0,0.12) 0%,transparent 70%)",
+          background: "radial-gradient(circle,rgba(193,68,14,0.15) 0%,transparent 70%)",
           pointerEvents: "none"
         }} />
         <div style={{
           position: "absolute", bottom: "-40px", left: "-30px",
           width: "200px", height: "200px",
-          background: "radial-gradient(circle,rgba(100,50,210,0.1) 0%,transparent 70%)",
+          background: "radial-gradient(circle,rgba(212,165,116,0.1) 0%,transparent 70%)",
           pointerEvents: "none"
         }} />
         <div style={{
@@ -126,23 +153,24 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
   }
 
   return (
-    <div className="story-card-glow" style={{
-      background: "linear-gradient(140deg,#110926 0%,#1c0d3a 60%,#150827 100%)",
-      borderRadius: "28px", padding: "36px", minHeight: "460px",
+    <div className="story-wood-frame story-card-glow" style={{
+      background: "linear-gradient(140deg, rgba(245,222,179,0.1) 0%, rgba(212,165,116,0.08) 60%, rgba(245,222,179,0.06) 100%)",
+      borderRadius: "12px", padding: "32px", minHeight: "460px",
       position: "relative", overflow: "hidden",
-      border: "1px solid rgba(255,255,255,0.06)",
-      boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
+      border: "6px solid",
+      borderImage: "linear-gradient(135deg, #5c3d2e 0%, #8b5a3c 50%, #5c3d2e 100%) 1",
+      boxShadow: "inset 0 0 30px rgba(0,0,0,0.15), 0 12px 32px rgba(193,68,14,0.2)"
     }}>
       <div style={{
         position: "absolute", top: "-60px", right: "-60px",
         width: "250px", height: "250px",
-        background: "radial-gradient(circle,rgba(240,163,0,0.12) 0%,transparent 70%)",
+        background: "radial-gradient(circle,rgba(193,68,14,0.12) 0%,transparent 70%)",
         pointerEvents: "none"
       }} />
       <div style={{
         position: "absolute", bottom: "-40px", left: "-30px",
         width: "200px", height: "200px",
-        background: "radial-gradient(circle,rgba(100,50,210,0.1) 0%,transparent 70%)",
+        background: "radial-gradient(circle,rgba(212,165,116,0.08) 0%,transparent 70%)",
         pointerEvents: "none"
       }} />
       <div style={{ position: "relative", zIndex: 1 }}>
@@ -235,7 +263,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
             ⬇️ PDF
           </button>
           <button className="action-btn magic-hover" disabled={tts.isLoading}
-            onClick={() => { if (tts.isSpeaking) tts.stop(); else tts.speak((story.ttsBody || story.body).replace(/<[^>]*>/g, ""), story.language); }}
+            onClick={handleRead}
             style={{
               flex: 1, minWidth: "72px", borderRadius: "14px",
               border: "1px solid rgba(240,163,0,0.2)",
@@ -244,7 +272,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
               fontFamily: "inherit", fontWeight: 700,
               display: "flex", alignItems: "center", justifyContent: "center", gap: "5px"
             }}>
-            {tts.isLoading ? "🎧..." : tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
+            {tts.isLoading ? "🎧..." : directPlaying || tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
           </button>
           <button className="action-btn magic-hover" onClick={onNew}
             style={{
@@ -260,5 +288,5 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
         </div>
       </div>
     </div>
-  );
+ );
 }
