@@ -1,0 +1,64 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="#f5deb3" opacity="0.8" stroke="#c1440e" stroke-width="2"/>
+
+  <!-- Lantern (hanging) -->
+  <g id="lantern">
+    <!-- Lantern frame -->
+    <rect x="50" y="15" width="20" height="25" fill="none" stroke="#8b5a3c" stroke-width="2" rx="2"/>
+
+    <!-- Lantern cross (support) -->
+    <line x1="50" y1="27" x2="70" y2="27" stroke="#8b5a3c" stroke-width="1"/>
+    <line x1="60" y1="15" x2="60" y2="40" stroke="#8b5a3c" stroke-width="1"/>
+
+    <!-- Lantern glow (light inside) -->
+    <ellipse cx="60" cy="27" rx="8" ry="10" fill="#ffd700" opacity="0.6"/>
+    <circle cx="60" cy="27" r="4" fill="#ffff00" opacity="0.8"/>
+
+    <!-- Hanging chain -->
+    <line x1="60" y1="10" x2="60" y2="15" stroke="#d4a574" stroke-width="1.5"/>
+  </g>
+
+  <!-- Books (stacked) -->
+  <g id="books">
+    <!-- Bottom book (red/rust) -->
+    <rect x="25" y="65" width="18" height="25" fill="#c1440e" rx="1"/>
+    <rect x="25" y="65" width="18" height="3" fill="#8b5a3c"/>
+    <line x1="25" y1="73" x2="43" y2="73" stroke="#8b5a3c" stroke-width="1" opacity="0.5"/>
+
+    <!-- Middle book (gold) -->
+    <rect x="30" y="55" width="18" height="25" fill="#ffc857" rx="1" transform="rotate(-8 39 67)"/>
+    <rect x="30" y="55" width="18" height="3" fill="#d4a574" transform="rotate(-8 39 67)"/>
+
+    <!-- Top book (cream) -->
+    <rect x="35" y="50" width="18" height="25" fill="#f5deb3" rx="1" transform="rotate(5 44 62)"/>
+    <line x1="35" y1="58" x2="53" y2="58" stroke="#d4a574" stroke-width="1" opacity="0.6" transform="rotate(5 44 62)"/>
+  </g>
+
+  <!-- Quill pen -->
+  <g id="quill">
+    <line x1="70" y1="60" x2="85" y2="45" stroke="#8b7355" stroke-width="2" stroke-linecap="round"/>
+    <!-- Feather tip -->
+    <path d="M 85 45 Q 87 42 88 39" stroke="#d4a574" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- Ink tip -->
+    <circle cx="70" cy="60" r="2.5" fill="#3d2817"/>
+  </g>
+
+  <!-- Crown (wisdom symbol) at top -->
+  <g transform="translate(60, 8)">
+    <!-- Crown base -->
+    <line x1="-8" y1="0" x2="8" y2="0" stroke="#ffc857" stroke-width="2"/>
+    <!-- Crown points -->
+    <polygon points="0,-5 -6,1 -3,1 -4,-3 -2,1" fill="#ffc857"/>
+    <polygon points="4,-7 1,1 3,1 2,-3 4,1" fill="#ffc857"/>
+    <polygon points="8,-5 6,1 8,1 6,-3 9,1" fill="#ffc857"/>
+    <!-- Jewels -->
+    <circle cx="-4" cy="-3" r="1.5" fill="#ff6b6b" opacity="0.8"/>
+    <circle cx="0" cy="-5" r="1.5" fill="#ff6b6b" opacity="0.8"/>
+    <circle cx="4" cy="-4" r="1.5" fill="#ff6b6b" opacity="0.8"/>
+  </g>
+
+  <!-- Decorative border -->
+  <path d="M 10 60 Q 5 40 20 30" fill="none" stroke="#dc8033" stroke-width="1.5" opacity="0.6" stroke-dasharray="2,2"/>
+  <path d="M 110 60 Q 115 40 100 30" fill="none" stroke="#dc8033" stroke-width="1.5" opacity="0.6" stroke-dasharray="2,2"/>
+</svg>

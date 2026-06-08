@@ -1,0 +1,56 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#f5deb3" opacity="0.8" stroke="#c1440e" stroke-width="2"/>
+
+  <!-- Globe -->
+  <circle cx="50" cy="50" r="20" fill="#8bc34a" opacity="0.7" stroke="#7cb342" stroke-width="1.5"/>
+
+  <!-- Continents/Land masses (simplified) -->
+  <!-- Africa -->
+  <ellipse cx="55" cy="48" rx="4" ry="6" fill="#7cb342" opacity="0.8" transform="rotate(20 55 48)"/>
+  <!-- Asia -->
+  <path d="M 60 40 L 65 42 L 65 50 L 60 52 Z" fill="#7cb342" opacity="0.8"/>
+  <!-- Americas -->
+  <ellipse cx="38" cy="52" rx="3.5" ry="5" fill="#7cb342" opacity="0.8"/>
+
+  <!-- Grid lines on globe -->
+  <circle cx="50" cy="50" r="20" fill="none" stroke="#5a7a2f" stroke-width="0.5" opacity="0.4"/>
+  <ellipse cx="50" cy="50" rx="20" ry="8" fill="none" stroke="#5a7a2f" stroke-width="0.5" opacity="0.4"/>
+  <line x1="30" y1="50" x2="70" y2="50" stroke="#5a7a2f" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- Language symbols (letters/scripts) around globe -->
+  <!-- Latin "A" -->
+  <text x="30" y="35" font-family="Georgia, serif" font-size="12" fill="#3d2817" opacity="0.7">A</text>
+
+  <!-- Devanagari-like symbol -->
+  <text x="70" y="40" font-family="Arial, sans-serif" font-size="10" fill="#3d2817" opacity="0.7" font-weight="bold">अ</text>
+
+  <!-- Chinese/Asian symbol -->
+  <text x="65" y="62" font-family="Arial, sans-serif" font-size="12" fill="#3d2817" opacity="0.7">中</text>
+
+  <!-- Arrows showing selection -->
+  <g transform="translate(25, 50)">
+    <path d="M 0 -8 L 0 8 M -4 4 L 0 8 L 4 4" stroke="#dc8033" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g transform="translate(75, 50)">
+    <path d="M 0 -8 L 0 8 M -4 4 L 0 8 L 4 4" stroke="#dc8033" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Palette/Theme indicator -->
+  <g transform="translate(50, 72)">
+    <!-- Palette shape -->
+    <circle cx="0" cy="0" r="8" fill="none" stroke="#d4a574" stroke-width="1.5"/>
+    <!-- Color dots on palette -->
+    <circle cx="-4" cy="-2" r="1.5" fill="#dc8033"/>
+    <circle cx="0" cy="-4" r="1.5" fill="#ffc857"/>
+    <circle cx="4" cy="-2" r="1.5" fill="#8bc34a"/>
+    <circle cx="-4" cy="2" r="1.5" fill="#c1440e"/>
+    <!-- Brush -->
+    <line x1="0" y1="6" x2="2" y2="12" stroke="#8b5a3c" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Number badge -->
+  <circle cx="50" cy="8" r="7" fill="#dc8033"/>
+  <text x="50" y="12" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">02</text>
+</svg>

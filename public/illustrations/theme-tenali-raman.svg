@@ -1,0 +1,72 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a574;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c9956e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="#f5deb3" opacity="0.8" stroke="#c1440e" stroke-width="2"/>
+
+  <!-- Head (round, cheerful) -->
+  <circle cx="60" cy="45" r="20" fill="url(#faceGrad)"/>
+
+  <!-- Hair (dark, styled) -->
+  <ellipse cx="60" cy="30" rx="22" ry="18" fill="#3d2817"/>
+  <!-- Hair curl on side -->
+  <path d="M 38 40 Q 33 42 35 50" stroke="#3d2817" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M 82 40 Q 87 42 85 50" stroke="#3d2817" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Eyes (clever, winking) -->
+  <circle cx="50" cy="42" r="3.5" fill="#1a1a1a"/>
+  <path d="M 68 42 L 75 40 Q 72 45 68 43" fill="#1a1a1a"/>
+
+  <!-- Eyebrows (raised/clever) -->
+  <path d="M 47 37 Q 50 35 53 37" stroke="#8b7355" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M 67 36 Q 72 33 77 36" stroke="#8b7355" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Nose -->
+  <line x1="60" y1="45" x2="60" y2="53" stroke="#a68968" stroke-width="1.2"/>
+
+  <!-- Clever smile/smirk -->
+  <path d="M 50 56 Q 60 62 68 56" stroke="#8b5a3c" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 52 55 Q 60 60 66 56" fill="#f5deb3" opacity="0.4"/>
+
+  <!-- Turban/hat -->
+  <ellipse cx="60" cy="25" rx="24" ry="10" fill="#c1440e"/>
+  <ellipse cx="60" cy="23" rx="24" ry="8" fill="#dc8033"/>
+  <!-- Turban pattern -->
+  <line x1="40" y1="25" x2="80" y2="25" stroke="#8b5a3c" stroke-width="1" opacity="0.5"/>
+  <!-- Turban jewel -->
+  <circle cx="60" cy="20" r="3" fill="#ffc857"/>
+
+  <!-- Body (wearing traditional dress) -->
+  <ellipse cx="60" cy="75" rx="18" ry="22" fill="#8b5a3c"/>
+  <!-- Kurta design -->
+  <line x1="50" y1="70" x2="50" y2="90" stroke="#ffc857" stroke-width="1" opacity="0.6"/>
+  <line x1="60" y1="70" x2="60" y2="95" stroke="#ffc857" stroke-width="1" opacity="0.6"/>
+  <line x1="70" y1="70" x2="70" y2="90" stroke="#ffc857" stroke-width="1" opacity="0.6"/>
+
+  <!-- Arms (gesturing cleverly) -->
+  <!-- Left arm -->
+  <ellipse cx="45" cy="68" rx="8" ry="20" fill="url(#faceGrad)" transform="rotate(-30 45 68)"/>
+  <!-- Right arm -->
+  <ellipse cx="75" cy="68" rx="8" ry="20" fill="url(#faceGrad)" transform="rotate(30 75 68)"/>
+
+  <!-- Light bulb (clever idea) -->
+  <g transform="translate(85, 35)">
+    <!-- Bulb -->
+    <circle cx="0" cy="-1" r="5" fill="#ffff00" opacity="0.7"/>
+    <ellipse cx="0" cy="4" rx="2" ry="1.5" fill="#ffd700"/>
+    <!-- Filament -->
+    <path d="M -2 0 Q -1 2 0 2.5 Q 1 2 2 0" stroke="#ffc857" stroke-width="0.8" fill="none"/>
+    <!-- Light rays -->
+    <line x1="0" y1="-6.5" x2="0" y2="-9" stroke="#ffc857" stroke-width="1" stroke-linecap="round"/>
+    <line x1="4.5" y1="-2" x2="6.5" y2="-4" stroke="#ffc857" stroke-width="1" stroke-linecap="round"/>
+    <line x1="-4.5" y1="-2" x2="-6.5" y2="-4" stroke="#ffc857" stroke-width="1" stroke-linecap="round"/>
+  </g>
+
+  <!-- Decorative border -->
+  <path d="M 15 60 Q 10 45 25 35" fill="none" stroke="#dc8033" stroke-width="1.5" opacity="0.6" stroke-dasharray="2,2"/>
+</svg>

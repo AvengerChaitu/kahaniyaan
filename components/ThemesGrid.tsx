@@ -1,11 +1,21 @@
 "use client";
 
+import Image from "next/image";
+
 interface Props {
   themes: string[];
   selectedTheme: string;
   themeData: Record<string, { icon: string; color: string; desc: string; bg: string }>;
   onSelect: (t: string) => void;
 }
+
+const themeIllustrations: Record<string, string> = {
+  Panchatantra: "/illustrations/theme-panchatantra.svg",
+  Birbal: "/illustrations/theme-birbal.svg",
+  "Tenali Raman": "/illustrations/theme-tenali-raman.svg",
+  Festival: "/illustrations/theme-festival.svg",
+  "Moral Story": "/illustrations/theme-moral-story.svg",
+};
 
 export default function ThemesGrid({ themes, selectedTheme, themeData, onSelect }: Props) {
   return (
@@ -38,8 +48,12 @@ export default function ThemesGrid({ themes, selectedTheme, themeData, onSelect 
                 border: `2px solid ${selectedTheme === t ? d.color : "#ede0d4"}`,
                 boxShadow: selectedTheme === t ? `0 8px 28px ${d.bg}` : "none"
               }}>
-              <div style={{ fontSize: "40px", marginBottom: "14px", lineHeight: 1 }}>
-                {d.icon}
+              <div style={{ width: "100%", height: "100px", marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src={themeIllustrations[t] || d.icon}
+                  alt={t}
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
               </div>
               <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--brown)", marginBottom: "5px" }}>
                 {t}

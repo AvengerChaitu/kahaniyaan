@@ -47,33 +47,65 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
       }} />
 
       <div className="hero-content" style={{
-        position: "relative", zIndex: 10, textAlign: "center",
-        padding: "5rem 2rem 2rem"
+        position: "relative", zIndex: 10,
+        padding: "4rem 2rem 2rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "2rem",
+        flexWrap: "wrap",
+        maxWidth: "1000px",
+        margin: "0 auto"
       }}>
-        <p className="fade-up" style={{
-          fontFamily: "'Dancing Script', cursive", fontSize: "clamp(1rem,2.5vw,1.35rem)",
-          color: "#ffc857", marginBottom: "0.9rem",
-          animationDelay: "0.2s"
+        {/* Grandmother Illustration */}
+        <div className="fade-up" style={{
+          flex: "0 1 300px",
+          textAlign: "center",
+          maxWidth: "100%",
+          animationDelay: "0.1s"
         }}>
-          ✦ &nbsp; Come beta, sit down &nbsp; ✦
-        </p>
-        <h1 className="fade-up" style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: "clamp(3rem,13vw,10rem)", fontWeight: 700,
-          lineHeight: 0.9, letterSpacing: "-0.03em",
-          color: "var(--cream)", marginBottom: "1.4rem",
-          animationDelay: "0.4s"
+          <img
+            src="/illustrations/grandmother-storyteller.svg"
+            alt="Grandmother storyteller"
+            style={{
+              width: "100%",
+              height: "auto",
+              maxWidth: "280px",
+              filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.3))"
+            }}
+          />
+        </div>
+
+        {/* Text Content */}
+        <div style={{
+          flex: "1 1 300px",
+          textAlign: "left",
+          minWidth: "280px"
         }}>
-          Dadi<span style={{ fontStyle: "italic", color: "var(--amber)" }}>ma</span>
-        </h1>
-        <p className="fade-up" style={{
-          fontSize: "clamp(0.9rem,2.2vw,1.2rem)",
-          color: "rgba(253,244,227,0.68)",
-          maxWidth: "460px", margin: "0 auto 2.4rem", lineHeight: 1.75,
-          fontFamily: "'Lora', serif", animationDelay: "0.6s"
-        }}>
-          Where grandma never stopped telling stories. Every bedtime. Every night. Right here, for your family.
-        </p>
+          <p className="fade-up" style={{
+            fontFamily: "'Dancing Script', cursive", fontSize: "clamp(1rem,2.5vw,1.35rem)",
+            color: "#ffc857", marginBottom: "0.9rem",
+            animationDelay: "0.2s"
+          }}>
+            ✦ &nbsp; Come beta, sit down &nbsp; ✦
+          </p>
+          <h1 className="fade-up" style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(2.4rem,6vw,4rem)", fontWeight: 700,
+            lineHeight: 0.9, letterSpacing: "-0.03em",
+            color: "var(--cream)", marginBottom: "1.4rem",
+            animationDelay: "0.4s"
+          }}>
+            Dadi<span style={{ fontStyle: "italic", color: "var(--amber)" }}>ma</span>
+          </h1>
+          <p className="fade-up" style={{
+            fontSize: "clamp(0.9rem,2vw,1.1rem)",
+            color: "rgba(245,222,179,0.8)",
+            marginBottom: "2rem", lineHeight: 1.75,
+            fontFamily: "'Lora', serif", animationDelay: "0.6s"
+          }}>
+            Where grandma never stopped telling stories. Every bedtime. Every night. Right here, for your family.
+          </p>
         <div className="fade-up" style={{
           display: "flex", gap: "1rem", justifyContent: "center",
           flexWrap: "wrap", animationDelay: "0.8s"

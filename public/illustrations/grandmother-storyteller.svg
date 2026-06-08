@@ -1,0 +1,69 @@
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define gradients -->
+  <defs>
+    <linearGradient id="sariGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c1440e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dc8033;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="skinTone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a574;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c9956e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sari (bottom part) -->
+  <ellipse cx="100" cy="180" rx="65" ry="50" fill="url(#sariGrad)" opacity="0.9"/>
+  <path d="M 50 140 Q 40 160 45 200 L 155 200 Q 160 160 150 140 Z" fill="url(#sariGrad)"/>
+
+  <!-- Sari pleats (decorative) -->
+  <line x1="70" y1="140" x2="65" y2="200" stroke="#8b5a3c" stroke-width="1.5" opacity="0.5"/>
+  <line x1="90" y1="135" x2="85" y2="200" stroke="#8b5a3c" stroke-width="1.5" opacity="0.5"/>
+  <line x1="110" y1="135" x2="115" y2="200" stroke="#8b5a3c" stroke-width="1.5" opacity="0.5"/>
+  <line x1="130" y1="140" x2="135" y2="200" stroke="#8b5a3c" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Blouse (torso) -->
+  <ellipse cx="100" cy="100" rx="45" ry="50" fill="#8b5a3c"/>
+
+  <!-- Gold bindi (forehead mark) -->
+  <circle cx="100" cy="50" r="6" fill="#ffc857"/>
+  <circle cx="100" cy="50" r="4" fill="#ffd700"/>
+
+  <!-- Face -->
+  <circle cx="100" cy="65" r="30" fill="url(#skinTone)"/>
+
+  <!-- Hair (white/gray) -->
+  <ellipse cx="100" cy="40" rx="32" ry="25" fill="#e8e8e8"/>
+  <path d="M 70 45 Q 65 30 75 20 Q 85 15 100 12 Q 115 15 125 20 Q 135 30 130 45" fill="#d0d0d0"/>
+
+  <!-- Eyes (warm, kind) -->
+  <circle cx="88" cy="60" r="3.5" fill="#3d2817"/>
+  <circle cx="112" cy="60" r="3.5" fill="#3d2817"/>
+  <circle cx="89" cy="59" r="1.5" fill="white"/>
+  <circle cx="113" cy="59" r="1.5" fill="white"/>
+
+  <!-- Eyebrows (kind expression) -->
+  <path d="M 85 54 Q 88 52 91 54" stroke="#8b7355" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M 109 54 Q 112 52 115 54" stroke="#8b7355" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+  <!-- Nose -->
+  <line x1="100" y1="62" x2="100" y2="72" stroke="#a68968" stroke-width="1"/>
+
+  <!-- Warm smile (crescent shape) -->
+  <path d="M 88 75 Q 100 82 112 75" stroke="#8b5a3c" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 90 74 Q 100 80 110 74" fill="#f5deb3" opacity="0.5"/>
+
+  <!-- Left arm (gesturing warmly) -->
+  <ellipse cx="65" cy="90" rx="12" ry="35" fill="url(#skinTone)" transform="rotate(-25 65 90)"/>
+  <circle cx="52" cy="65" r="8" fill="url(#skinTone)"/>
+
+  <!-- Right arm (open gesture) -->
+  <ellipse cx="135" cy="85" rx="12" ry="38" fill="url(#skinTone)" transform="rotate(30 135 85)"/>
+  <circle cx="150" cy="58" r="8" fill="url(#skinTone)"/>
+
+  <!-- Bangles (gold) -->
+  <circle cx="52" cy="72" r="6" fill="none" stroke="#ffc857" stroke-width="2"/>
+  <circle cx="52" cy="80" r="6" fill="none" stroke="#ffc857" stroke-width="2"/>
+
+  <!-- Heart/glow (warm energy) -->
+  <circle cx="100" cy="100" r="48" fill="none" stroke="#ffc857" stroke-width="1" opacity="0.3" stroke-dasharray="3,2"/>
+</svg>

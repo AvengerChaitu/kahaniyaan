@@ -1,0 +1,51 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#f5deb3" opacity="0.8" stroke="#c1440e" stroke-width="2"/>
+
+  <!-- Open Book -->
+  <!-- Left page -->
+  <path d="M 25 30 L 50 32 L 50 70 L 25 68 Z" fill="#f5deb3" stroke="#d4a574" stroke-width="1.5"/>
+  <!-- Right page -->
+  <path d="M 50 32 L 75 30 L 75 68 L 50 70 Z" fill="#fffef0" stroke="#d4a574" stroke-width="1.5"/>
+
+  <!-- Book spine -->
+  <line x1="50" y1="30" x2="50" y2="70" stroke="#8b5a3c" stroke-width="3"/>
+
+  <!-- Left page text lines -->
+  <line x1="30" y1="40" x2="45" y2="40" stroke="#c9956e" stroke-width="1" opacity="0.6"/>
+  <line x1="28" y1="47" x2="48" y2="47" stroke="#c9956e" stroke-width="1" opacity="0.6"/>
+  <line x1="28" y1="54" x2="47" y2="54" stroke="#c9956e" stroke-width="1" opacity="0.6"/>
+  <line x1="30" y1="61" x2="46" y2="61" stroke="#c9956e" stroke-width="1" opacity="0.6"/>
+
+  <!-- Right page text lines -->
+  <line x1="55" y1="40" x2="70" y2="40" stroke="#8b7355" stroke-width="1" opacity="0.7"/>
+  <line x1="53" y1="47" x2="72" y2="47" stroke="#8b7355" stroke-width="1" opacity="0.7"/>
+  <line x1="53" y1="54" x2="71" y2="54" stroke="#8b7355" stroke-width="1" opacity="0.7"/>
+  <line x1="55" y1="61" x2="70" y2="61" stroke="#8b7355" stroke-width="1" opacity="0.7"/>
+
+  <!-- Magical sparkles (showing uniqueness) -->
+  <!-- Top left sparkle -->
+  <g transform="translate(25, 25)">
+    <polygon points="0,-3 1,-1 3,-1 1.5,0.5 2,2.5 0,1 -2,2.5 -1.5,0.5 -3,-1 -1,-1" fill="#ffc857" opacity="0.8"/>
+  </g>
+
+  <!-- Top right sparkle -->
+  <g transform="translate(75, 25)">
+    <polygon points="0,-3 1,-1 3,-1 1.5,0.5 2,2.5 0,1 -2,2.5 -1.5,0.5 -3,-1 -1,-1" fill="#ffc857" opacity="0.8"/>
+  </g>
+
+  <!-- Bottom sparkle -->
+  <g transform="translate(50, 75)">
+    <polygon points="0,-2.5 0.8,-0.5 2.5,-0.5 1.5,0.5 1.5,2.5 0,1 -1.5,2.5 -1.5,0.5 -2.5,-0.5 -0.8,-0.5" fill="#dc8033" opacity="0.7"/>
+  </g>
+
+  <!-- Star/light effect -->
+  <circle cx="50" cy="50" r="25" fill="none" stroke="#ffc857" stroke-width="0.5" opacity="0.3" stroke-dasharray="2,2"/>
+
+  <!-- Page flip curl effect (top right) -->
+  <path d="M 73 32 Q 78 35 75 42" stroke="#d4a574" stroke-width="1" fill="none" opacity="0.5" stroke-dasharray="2,2"/>
+
+  <!-- Number badge -->
+  <circle cx="50" cy="8" r="7" fill="#dc8033"/>
+  <text x="50" y="12" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">03</text>
+</svg>
