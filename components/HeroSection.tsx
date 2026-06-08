@@ -140,6 +140,7 @@ export default function HeroSection({ onExploreClick, onCreateClick }: Props) {
             Explore Stories →
           </button>
         </div>
+        </div>
       </div>
 
       <div className="scene-wrap" style={{
