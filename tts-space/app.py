@@ -20,47 +20,29 @@ tokenizer = None
 description_tokenizer = None
 sampling_rate = 24000
 
+# Voice description for all languages — shapes the TTS voice character.
+# ParlerTTS uses this as a text prompt to condition the voice style.
+# Keep it consistent across languages so the "grandma" identity is preserved.
+_GRANDMA_VOICE = (
+    "A warm-voiced elderly woman narrates a children's bedtime story. "
+    "Her tone is soft, melodic and deeply soothing, like a loving grandmother "
+    "sitting beside a lamp at night. She speaks slowly and clearly, "
+    "pausing gently between sentences so children can follow every word. "
+    "Her voice carries quiet joy and tenderness. "
+    "The recording is intimate and close, with no background noise."
+)
+
 LANG_CONFIG = {
-    "Hindi": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Telugu": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Tamil": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Kannada": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Malayalam": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Marathi": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Bengali": {
-        "speaker": "Grandma",
-        "description": "An elderly grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Gujarati": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "Punjabi": {
-        "speaker": "Grandma",
-        "description": "An elderly Indian grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
-    "English": {
-        "speaker": "Grandma",
-        "description": "An elderly grandmother speaks with a warm, gentle voice in a quiet room, at a slow pace with affectionate intonation, clear audio with no background noise.",
-    },
+    "Hindi":     {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Telugu":    {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Tamil":     {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Kannada":   {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Malayalam": {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Marathi":   {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Bengali":   {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Gujarati":  {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "Punjabi":   {"speaker": "Grandma", "description": _GRANDMA_VOICE},
+    "English":   {"speaker": "Grandma", "description": _GRANDMA_VOICE},
 }
 
 
