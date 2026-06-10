@@ -40,13 +40,20 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
   const [directPlaying, setDirectPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  function fallbackSpeak() {
+    tts.speak(
+      (story?.ttsBody || story?.body || "").replace(/<[^>]*>/g, ""),
+      story?.language || "Hindi"
+    );
+  }
+
   function playDirect(url: string) {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     const audio = new Audio(url);
     audioRef.current = audio;
     audio.onended = () => setDirectPlaying(false);
-    audio.onerror = () => setDirectPlaying(false);
-    audio.play().then(() => setDirectPlaying(true)).catch(() => setDirectPlaying(false));
+    audio.onerror = () => { setDirectPlaying(false); fallbackSpeak(); };
+    audio.play().then(() => setDirectPlaying(true)).catch(() => { setDirectPlaying(false); fallbackSpeak(); });
   }
 
   function stopDirect() {
@@ -58,9 +65,9 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
 
   function handleRead() {
     if (directPlaying) { stopDirect(); return; }
+    if (tts.isSpeaking) { tts.stop(); return; }
     if (story?.ttsUrl) { playDirect(story.ttsUrl); return; }
-    if (tts.isSpeaking) tts.stop();
-    else tts.speak((story?.ttsBody || story?.body || "").replace(/<[^>]*>/g, ""), story?.language || "Hindi");
+    fallbackSpeak();
   }
   if (!story) {
     return (
