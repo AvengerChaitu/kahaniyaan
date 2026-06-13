@@ -6,7 +6,6 @@ import { Show, SignInButton } from "@clerk/nextjs";
 interface Story {
   title: string;
   body: string;
-  ttsBody: string;
   language: string;
   theme: string;
   age: string;
@@ -42,7 +41,7 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
 
   function fallbackSpeak() {
     tts.speak(
-      (story?.ttsBody || story?.body || "").replace(/<[^>]*>/g, ""),
+      (story?.body || "").replace(/<[^>]*>/g, ""),
       story?.language || "Hindi"
     );
   }

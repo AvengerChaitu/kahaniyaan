@@ -30,7 +30,6 @@ const THEME_DATA: Record<string, { icon: string; color: string; desc: string; bg
 interface Story {
   title: string;
   body: string;
-  ttsBody: string;
   language: string;
   theme: string;
   age: string;
@@ -72,7 +71,7 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate story");
-      setStory({ title: data.title, body: data.body, ttsBody: data.ttsBody || data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim(), moral: data.moral, moralLabel: getMoralLabel(selectedLang), ttsUrl: data.ttsUrl || undefined });
+      setStory({ title: data.title, body: data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim(), moral: data.moral, moralLabel: getMoralLabel(selectedLang), ttsUrl: data.ttsUrl || undefined });
       if (data.templateId) {
         setExcludeIds(prev => [data.templateId, ...prev].slice(0, 3));
       }

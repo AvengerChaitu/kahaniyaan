@@ -1,6 +1,6 @@
 export const TERM_MAP: Record<string, { term: string; script: string }> = {
   Hindi: { term: "बेटा", script: "beta" },
-  Telugu: { term: "బాబు", script: "babu" },
+  Telugu: { term: "కన్నా", script: "kanna" },
   Tamil: { term: "கண்ணு", script: "kannu" },
   Kannada: { term: "ಮುದ್ದು", script: "muddu" },
   Malayalam: { term: "കുഞ്ഞേ", script: "kunje" },

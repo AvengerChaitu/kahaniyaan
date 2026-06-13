@@ -2,6 +2,14 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getTerm } from "@/lib/tts-terms";
+import { createHash } from "crypto";
+
+const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+
+function computeTtsUrl(body: string, language: string): string {
+  const hash = createHash("md5").update(`${language}:${body}`).digest("hex");
+  return `https://res.cloudinary.com/${CLOUD_NAME}/raw/upload/tts/${language}/${hash}.mp3`;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -69,9 +77,8 @@ export async function POST(req: NextRequest) {
 
     // Replace placeholders
     const title = template.title.replace(/\{childname\}/g, name);
-    const body = template.body.replace(/\{childname\}/g, name);
     const term = getTerm(language);
-    const ttsBody = template.body.replace(/\{childname\}/g, term);
+    const body = template.body.replace(/\{childname\}/g, term);
     const moral = template.moral || "";
 
     // Track usage for logged-in users
@@ -98,7 +105,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ title, body, ttsBody, moral, templateId: template.id });
+    return NextResponse.json({ title, body, moral, templateId: template.id, ttsUrl: computeTtsUrl(template.body, language) });
   } catch (error) {
     console.error("Story fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch story" }, { status: 500 });
