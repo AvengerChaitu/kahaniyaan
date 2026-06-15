@@ -53,15 +53,18 @@ THEME_CONTEXT = {
 }
 
 # ── INSTALL ──────────────────────────────────────────────────
-import subprocess, sys
+import subprocess, sys, importlib
 
 def install(pkg):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])
 
+# gptqmodel must be installed before transformers is imported
+install("gptqmodel")
+importlib.invalidate_caches()
+
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
-install("gptqmodel")
 
 print("✓ Packages installed")
 
