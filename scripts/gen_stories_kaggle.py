@@ -1,9 +1,11 @@
 # ============================================================
-# KAHANIYAAN — Story Generation Script (v4: Hex-1 direct Indic)
+# KAHANIYAAN — Story Generation Script (v5: Qwen3-14B)
 #
-# Model: budecosystem/hex-1 (4B, built for Telugu/Hindi/Tamil/Kannada/Malayalam)
-# Supports 32K output tokens — no truncation on long Indian-script stories.
-# 4B in 4-bit ≈ 2.5GB weights → easily fits single T4, zero OOM risk.
+# Model: Qwen/Qwen3-14B
+#   - 14B params, 4-bit NF4 ≈ 9GB → fits single T4 comfortably
+#   - Strong Hindi + Telugu/Tamil/Kannada multilingual quality
+#   - 32K context, ~3-5 min per story (faster than small Indic models)
+#   - Thinking mode disabled (/no_think) for clean JSON output
 #
 # Run on Kaggle:
 #   Settings → Accelerator → GPU T4 x2
@@ -70,22 +72,21 @@ sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 print("✓ Supabase connected")
 
 # ── LOAD MODEL ───────────────────────────────────────────────
-MODEL_ID = "budecosystem/hex-1"
-print(f"Loading {MODEL_ID} in 4-bit...")
+MODEL_ID = "Qwen/Qwen3-14B"
+print(f"Loading {MODEL_ID} in 4-bit NF4...")
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_compute_dtype=torch.bfloat16,  # Qwen3 prefers bfloat16
     bnb_4bit_use_double_quant=True,
     bnb_4bit_quant_type="nf4",
 )
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True, token=HF_TOKEN or None)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN or None)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     quantization_config=bnb_config,
     device_map="auto",
-    trust_remote_code=True,
     token=HF_TOKEN or None,
 )
 model.eval()
@@ -124,22 +125,22 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
         f'"moral": "one sentence moral in {lang_native}"}}'
     )
 
-    if hasattr(tokenizer, "chat_template") and tokenizer.chat_template:
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    f"You are a master children's storyteller specialising in {lang_native} literature. "
-                    "You write warm, vivid, emotionally resonant bedtime stories in grandmother narration style. "
-                    "You ALWAYS return a single valid JSON object with no extra text before or after it. "
-                    "You NEVER use double-quote characters inside string values — you use single quotes for dialogue."
-                ),
-            },
-            {"role": "user", "content": instruction},
-        ]
-        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    else:
-        return f"### Instruction:\n{instruction}\n\n### Response:\n{{"
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                f"You are a master children's storyteller specialising in {lang_native} literature. "
+                "You write warm, vivid, emotionally resonant bedtime stories in grandmother narration style. "
+                "You ALWAYS return a single valid JSON object with no extra text before or after it. "
+                "You NEVER use double-quote characters inside string values — you use single quotes for dialogue."
+            ),
+        },
+        # /no_think disables Qwen3 chain-of-thought → clean JSON output, 2x faster
+        {"role": "user", "content": "/no_think\n\n" + instruction},
+    ]
+    return tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
+    )
 
 # ── JSON PARSER (multi-strategy, handles malformed output) ────
 import re as _re
@@ -213,11 +214,12 @@ def generate_story(lang_info, theme, language):
     torch.cuda.empty_cache()
     output = model.generate(
         **inputs,
-        max_new_tokens=8000,
+        max_new_tokens=6000,    # Qwen3 tokens are efficient; 6k → ~9000 chars
         do_sample=True,
-        temperature=0.85,
+        temperature=0.7,        # Qwen3 is expressive; lower temp = tighter JSON
         top_p=0.9,
-        repetition_penalty=1.1,
+        top_k=20,               # Qwen3 recommended setting
+        repetition_penalty=1.05,
         pad_token_id=tokenizer.eos_token_id,
     )
 
