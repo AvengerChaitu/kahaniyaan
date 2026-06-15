@@ -61,13 +61,13 @@ def install(pkg):
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
-install("autoawq")
+install("autoawq")     # still needed as AWQ dequant backend
+install("bitsandbytes")
 print("✓ Packages installed")
 
 # ── IMPORTS ──────────────────────────────────────────────────
 import json, time, re as _re, torch
-from transformers import AutoTokenizer
-from awq import AutoAWQForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from supabase import create_client
 
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -80,11 +80,12 @@ print(f"Loading {MODEL_ID} (AWQ INT4, ~18GB)...")
 tokenizer = AutoTokenizer.from_pretrained(
     MODEL_ID, trust_remote_code=True, token=HF_TOKEN or None
 )
-model = AutoAWQForCausalLM.from_pretrained(
+# Load via transformers native AWQ support — bypasses AutoAWQ's model type map
+# (AutoAWQ raised TypeError: sarvam_moe isn't supported yet)
+model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
-    device_map="auto",          # splits across both T4s automatically
-    fuse_layers=True,           # faster inference
-    trust_remote_code=True,
+    device_map="auto",        # splits across both T4s (32GB total)
+    trust_remote_code=True,   # needed for sarvam_moe custom architecture
     token=HF_TOKEN or None,
 )
 model.eval()
