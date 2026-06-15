@@ -1,16 +1,12 @@
 # ============================================================
-# KAHANIYAAN — Story Generation Script (v6: Qwen3-8B)
+# KAHANIYAAN — Story Generation Script (v7: Sarvam-30B AWQ)
 #
-# Model: Qwen/Qwen3-8B
-#   - 8B params, 4-bit NF4 ≈ 5GB VRAM after load
-#   - Loading peak: ~16GB (fits single T4 — no OOM)
-#   - Strong Hindi + Telugu/Tamil/Kannada multilingual quality
-#   - 32K context, ~2-4 min per story
-#   - Thinking mode disabled (/no_think) for clean JSON output
-#
-# Why not 14B? bitsandbytes loads fp16 first then quantizes.
-# 14B × 2 bytes = 28GB loading peak → squeezed T4 x2 → OOM.
-# 8B × 2 bytes = 16GB loading peak → fits one T4 with headroom.
+# Model: QuantTrio/sarvam-30b-AWQ  (pre-quantized INT4)
+#   - 30B params, AWQ = ~18GB on disk, loads directly at INT4
+#   - No bitsandbytes loading spike (loads pre-quantized)
+#   - T4 x2 (32GB) → fits comfortably with device_map="auto"
+#   - Purpose-built for 22 Indian languages incl. Telugu/Hindi/Tamil/Kannada
+#   - No thinking-mode issues (not Qwen3)
 #
 # Run on Kaggle:
 #   Settings → Accelerator → GPU T4 x2
@@ -18,14 +14,14 @@
 #   Set LANGUAGE_FILTER below → Save Version → close laptop
 #
 # Schedule:
-#   Session 1: ["Telugu", "Hindi"]   ~8h
-#   Session 2: ["Tamil", "Kannada"]  ~8h
-#   Session 3: ["English"]           ~4h
+#   Session 1: ["Telugu", "Hindi"]   ~10h
+#   Session 2: ["Tamil", "Kannada"]  ~10h
+#   Session 3: ["English"]           ~5h
 # ============================================================
 
 SUPABASE_URL         = "YOUR_SUPABASE_URL"          # e.g. https://xxxx.supabase.co
 SUPABASE_SERVICE_KEY = "YOUR_SUPABASE_SERVICE_KEY"  # Settings → API → service_role key
-HF_TOKEN             = ""                            # optional, leave blank if model is public
+HF_TOKEN             = ""                            # optional
 
 LANGUAGE_FILTER = ["Telugu", "Hindi"]
 
@@ -63,35 +59,32 @@ def install(pkg):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])
 
 install("supabase")
-install("transformers")
+install("transformers>=4.45.0")
 install("accelerate")
-install("bitsandbytes")
+install("autoawq")
 print("✓ Packages installed")
 
 # ── IMPORTS ──────────────────────────────────────────────────
-import json, time, torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+import json, time, re as _re, torch
+from transformers import AutoTokenizer
+from awq import AutoAWQForCausalLM
 from supabase import create_client
 
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 print("✓ Supabase connected")
 
 # ── LOAD MODEL ───────────────────────────────────────────────
-MODEL_ID = "Qwen/Qwen3-8B"
-print(f"Loading {MODEL_ID} in 4-bit NF4...")
+MODEL_ID = "QuantTrio/sarvam-30b-AWQ"
+print(f"Loading {MODEL_ID} (AWQ INT4, ~18GB)...")
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.bfloat16,  # Qwen3 prefers bfloat16
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_quant_type="nf4",
+tokenizer = AutoTokenizer.from_pretrained(
+    MODEL_ID, trust_remote_code=True, token=HF_TOKEN or None
 )
-
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN or None)
-model = AutoModelForCausalLM.from_pretrained(
+model = AutoAWQForCausalLM.from_pretrained(
     MODEL_ID,
-    quantization_config=bnb_config,
-    device_map="auto",
+    device_map="auto",          # splits across both T4s automatically
+    fuse_layers=True,           # faster inference
+    trust_remote_code=True,
     token=HF_TOKEN or None,
 )
 model.eval()
@@ -117,16 +110,15 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
         f"- Wrap 3–5 key story words in <strong>word</strong> tags\n"
         f"- Use \"{term}\" directly — no placeholder text\n"
         f"- Avoid these already-written titles: {avoid}\n\n"
-        f"CRITICAL JSON rules — failure to follow these causes an error:\n"
+        f"CRITICAL JSON rules:\n"
         f"- Return ONLY a single valid JSON object. No markdown, no code fences, no explanation.\n"
-        f"- Do NOT use double-quote characters (\") anywhere inside the title, body, or moral text.\n"
-        f"  For character dialogue or emphasis use single quotes (') instead.\n"
-        f"- All newlines inside the body MUST be written as the two characters \\n (backslash + n),\n"
-        f"  NOT as actual line breaks.\n"
-        f"- The JSON must be parseable by Python's json.loads() with no modification.\n\n"
-        f"Output format (copy this structure exactly):\n"
+        f"- Do NOT use double-quote characters (\") inside title, body, or moral text.\n"
+        f"  Use single quotes (') for dialogue instead.\n"
+        f"- All newlines in the body MUST be written as \\n (backslash + n), not actual line breaks.\n"
+        f"- The JSON must be parseable by Python json.loads() with no modification.\n\n"
+        f"Output format (copy exactly):\n"
         f'{{"title": "story title in {lang_native}", '
-        f'"body": "full story text using \\\\n\\\\n between paragraphs", '
+        f'"body": "full story text with \\\\n\\\\n between paragraphs", '
         f'"moral": "one sentence moral in {lang_native}"}}'
     )
 
@@ -137,20 +129,27 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
                 f"You are a master children's storyteller specialising in {lang_native} literature. "
                 "You write warm, vivid, emotionally resonant bedtime stories in grandmother narration style. "
                 "You ALWAYS return a single valid JSON object with no extra text before or after it. "
-                "You NEVER use double-quote characters inside string values — you use single quotes for dialogue."
+                "You NEVER use double-quote characters inside string values — use single quotes for dialogue."
             ),
         },
-        # /no_think disables Qwen3 chain-of-thought → clean JSON output, 2x faster
-        {"role": "user", "content": "/no_think\n\n" + instruction},
+        {"role": "user", "content": instruction},
     ]
-    return tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
-    )
 
-# ── JSON PARSER (multi-strategy, handles malformed output) ────
-import re as _re
+    try:
+        return tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+    except Exception:
+        # Fallback for models without chat template
+        sys_msg = messages[0]["content"]
+        usr_msg = messages[1]["content"]
+        return f"<|system|>\n{sys_msg}\n<|user|>\n{usr_msg}\n<|assistant|>\n{{"
 
+# ── JSON PARSER (multi-strategy) ─────────────────────────────
 def parse_story_response(text):
+    # Strip any stray markdown fences
+    text = _re.sub(r'```(?:json)?', '', text).strip()
+
     start = text.find("{")
     end   = text.rfind("}") + 1
     if start == -1 or end == 0:
@@ -163,13 +162,12 @@ def parse_story_response(text):
     except json.JSONDecodeError:
         pass
 
-    # Strategy 2 — escape bare newlines that sit inside string values
+    # Strategy 2 — escape bare newlines inside string values
     try:
         fixed = _re.sub(
             r'("(?:[^"\\]|\\.)*")',
             lambda m: m.group(0).replace('\n', '\\n').replace('\r', ''),
-            raw,
-            flags=_re.DOTALL,
+            raw, flags=_re.DOTALL,
         )
         return json.loads(fixed)
     except json.JSONDecodeError:
@@ -181,7 +179,7 @@ def parse_story_response(text):
     except json.JSONDecodeError:
         pass
 
-    # Strategy 4 — regex field extraction (works on very broken JSON)
+    # Strategy 4 — regex field extraction
     result = {}
     for key in ('title', 'body', 'moral'):
         m = _re.search(
@@ -219,12 +217,11 @@ def generate_story(lang_info, theme, language):
     torch.cuda.empty_cache()
     output = model.generate(
         **inputs,
-        max_new_tokens=6000,    # Qwen3 tokens are efficient; 6k → ~9000 chars
+        max_new_tokens=8000,
         do_sample=True,
-        temperature=0.7,        # Qwen3 is expressive; lower temp = tighter JSON
+        temperature=0.75,
         top_p=0.9,
-        top_k=20,               # Qwen3 recommended setting
-        repetition_penalty=1.05,
+        repetition_penalty=1.1,
         pad_token_id=tokenizer.eos_token_id,
     )
 
