@@ -61,6 +61,7 @@ def install(pkg):
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
+install("gptqmodel")
 
 print("✓ Packages installed")
 
