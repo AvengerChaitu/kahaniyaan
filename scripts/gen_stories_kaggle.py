@@ -1,12 +1,13 @@
 # ============================================================
-# KAHANIYAAN — Story Generation Script (v7: Sarvam-30B AWQ)
+# KAHANIYAAN — Story Generation Script (v8: Qwen2.5-7B-Instruct)
 #
-# Model: QuantTrio/sarvam-30b-AWQ  (pre-quantized INT4)
-#   - 30B params, AWQ = ~18GB on disk, loads directly at INT4
-#   - No bitsandbytes loading spike (loads pre-quantized)
-#   - T4 x2 (32GB) → fits comfortably with device_map="auto"
-#   - Purpose-built for 22 Indian languages incl. Telugu/Hindi/Tamil/Kannada
-#   - No thinking-mode issues (not Qwen3)
+# Model: Qwen/Qwen2.5-7B-Instruct  (bitsandbytes 4-bit NF4)
+#   - 7B params, fp16 load peak = 14GB → fits single T4 (16GB)
+#   - After 4-bit quant: ~4GB VRAM, 28GB free for KV cache
+#   - No thinking mode (Qwen2.5, not Qwen3) — clean JSON output
+#   - 29+ languages incl. Hindi, Telugu, Tamil, Kannada
+#   - 128K context window
+#   - Standard bitsandbytes loading — no custom code or architecture
 #
 # Run on Kaggle:
 #   Settings → Accelerator → GPU T4 x2
@@ -53,54 +54,42 @@ THEME_CONTEXT = {
 }
 
 # ── INSTALL ──────────────────────────────────────────────────
-import subprocess, sys, importlib
+import subprocess, sys
 
 def install(pkg):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])
 
-# compressed-tensors MUST come first — transformers checks for it at import time
-install("compressed-tensors")
-importlib.invalidate_caches()          # force Python to see newly installed pkg
-
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
-install("autoawq")
 install("bitsandbytes")
-
-# Verify compressed_tensors is importable before proceeding
-try:
-    import compressed_tensors
-    print(f"✓ compressed_tensors {compressed_tensors.__version__} ready")
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--force-reinstall", "-q", "compressed-tensors"])
-    importlib.invalidate_caches()
-    import compressed_tensors
-    print(f"✓ compressed_tensors (reinstalled) {compressed_tensors.__version__} ready")
 
 print("✓ Packages installed")
 
 # ── IMPORTS ──────────────────────────────────────────────────
 import json, time, re as _re, torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from supabase import create_client
 
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 print("✓ Supabase connected")
 
 # ── LOAD MODEL ───────────────────────────────────────────────
-MODEL_ID = "QuantTrio/sarvam-30b-AWQ"
-print(f"Loading {MODEL_ID} (AWQ INT4, ~18GB)...")
+MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
+print(f"Loading {MODEL_ID} (4-bit NF4, ~4GB VRAM after quant)...")
 
-tokenizer = AutoTokenizer.from_pretrained(
-    MODEL_ID, trust_remote_code=True, token=HF_TOKEN or None
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_compute_dtype=torch.float16,
 )
-# Load via transformers native AWQ support — bypasses AutoAWQ's model type map
-# (AutoAWQ raised TypeError: sarvam_moe isn't supported yet)
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN or None)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
-    device_map="auto",        # splits across both T4s (32GB total)
-    trust_remote_code=True,   # needed for sarvam_moe custom architecture
+    quantization_config=bnb_config,
+    device_map="auto",
     token=HF_TOKEN or None,
 )
 model.eval()
