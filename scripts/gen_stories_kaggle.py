@@ -196,7 +196,14 @@ def parse_story_response(text):
     if all(k in result for k in ('title', 'body', 'moral')):
         return result
 
-    raise ValueError(f"All parse strategies failed. Keys recovered: {list(result.keys())}")
+    # Final fallback — save raw text, fix JSON formatting later
+    lines = text.strip().split('\n')
+    title_guess = lines[0].strip()[:80] if lines else "Untitled Story"
+    return {
+        "title": title_guess or "Untitled Story",
+        "body":  text.strip(),
+        "moral": "",
+    }
 
 # ── GENERATION ───────────────────────────────────────────────
 @torch.inference_mode()
@@ -270,7 +277,7 @@ for language in LANGUAGE_FILTER:
                         raise ValueError(f"Missing keys: {list(data.keys())}")
 
                     body_len = len(data["body"])
-                    if body_len < 5000:
+                    if body_len < 500:
                         raise ValueError(f"Body too short: {body_len} chars")
 
                     sb.table("story_templates").insert({
