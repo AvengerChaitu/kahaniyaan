@@ -1,14 +1,12 @@
 # ============================================================
-# KAHANIYAAN — Story Generation Script (v8: Qwen2.5-7B-Instruct)
+# KAHANIYAAN — Story Generation Script (v9: Qwen2.5-7B-Instruct-AWQ)
 #
-# Model: Qwen/Qwen2.5-7B-Instruct-AWQ  (pre-quantized INT4, official)
-#   - 7B params, AWQ INT4 = ~4GB on GPU — fits single T4 (16GB) easily
-#   - 12GB free for KV cache / generation
+# Model: Qwen/Qwen2.5-7B-Instruct-AWQ  (official pre-quantized INT4)
+#   - AWQ INT4 = ~4GB on GPU — fits single T4 (16GB) with 12GB headroom
 #   - No bitsandbytes, no custom architecture — transformers native AWQ
 #   - No thinking mode (Qwen2.5, not Qwen3) — clean JSON output
 #   - 29+ languages incl. Hindi, Telugu, Tamil, Kannada
 #   - 128K context window
-#   - Standard bitsandbytes loading — no custom code or architecture
 #
 # Run on Kaggle:
 #   Settings → Accelerator → GPU T4 x2
