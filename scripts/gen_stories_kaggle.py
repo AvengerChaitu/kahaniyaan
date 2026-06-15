@@ -135,17 +135,22 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
     ]
 
     try:
-        return tokenizer.apply_chat_template(
+        prompt = tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
     except Exception:
         # Fallback for models without chat template
         sys_msg = messages[0]["content"]
         usr_msg = messages[1]["content"]
-        return f"<|system|>\n{sys_msg}\n<|user|>\n{usr_msg}\n<|assistant|>\n{{"
+        prompt = f"<|system|>\n{sys_msg}\n<|user|>\n{usr_msg}\n<|assistant|>\n"
+    # Seed the assistant turn with { so the model cannot generate prose before JSON
+    return prompt + "{"
 
 # ── JSON PARSER (multi-strategy) ─────────────────────────────
 def parse_story_response(text):
+    # The prompt ended with { so the model continues from there — prepend it back
+    if not text.lstrip().startswith("{"):
+        text = "{" + text
     # Strip any stray markdown fences
     text = _re.sub(r'```(?:json)?', '', text).strip()
 
