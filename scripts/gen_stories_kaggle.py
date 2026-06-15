@@ -89,7 +89,7 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN or None)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     quantization_config=bnb_config,
-    device_map="auto",
+    device_map={"": 0},        # all layers on GPU 0 — avoids bnb CPU-offload error
     token=HF_TOKEN or None,
 )
 model.eval()
@@ -217,7 +217,7 @@ def generate_story(lang_info, theme, language):
         existing_titles,
     )
 
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    inputs = tokenizer(prompt, return_tensors="pt").to("cuda:0")
 
     torch.cuda.empty_cache()
     output = model.generate(
