@@ -1,11 +1,16 @@
 # ============================================================
-# KAHANIYAAN — Story Generation Script (v5: Qwen3-14B)
+# KAHANIYAAN — Story Generation Script (v6: Qwen3-8B)
 #
-# Model: Qwen/Qwen3-14B
-#   - 14B params, 4-bit NF4 ≈ 9GB → fits single T4 comfortably
+# Model: Qwen/Qwen3-8B
+#   - 8B params, 4-bit NF4 ≈ 5GB VRAM after load
+#   - Loading peak: ~16GB (fits single T4 — no OOM)
 #   - Strong Hindi + Telugu/Tamil/Kannada multilingual quality
-#   - 32K context, ~3-5 min per story (faster than small Indic models)
+#   - 32K context, ~2-4 min per story
 #   - Thinking mode disabled (/no_think) for clean JSON output
+#
+# Why not 14B? bitsandbytes loads fp16 first then quantizes.
+# 14B × 2 bytes = 28GB loading peak → squeezed T4 x2 → OOM.
+# 8B × 2 bytes = 16GB loading peak → fits one T4 with headroom.
 #
 # Run on Kaggle:
 #   Settings → Accelerator → GPU T4 x2
@@ -72,7 +77,7 @@ sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 print("✓ Supabase connected")
 
 # ── LOAD MODEL ───────────────────────────────────────────────
-MODEL_ID = "Qwen/Qwen3-14B"
+MODEL_ID = "Qwen/Qwen3-8B"
 print(f"Loading {MODEL_ID} in 4-bit NF4...")
 
 bnb_config = BitsAndBytesConfig(
