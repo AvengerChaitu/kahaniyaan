@@ -61,7 +61,8 @@ def install(pkg):
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
-install("autoawq")     # still needed as AWQ dequant backend
+install("compressed-tensors")  # required for QuantTrio/sarvam-30b-AWQ
+install("autoawq")
 install("bitsandbytes")
 print("✓ Packages installed")
 
