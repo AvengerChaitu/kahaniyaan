@@ -1,9 +1,9 @@
 # ============================================================
 # KAHANIYAAN — Story Generation Script (v8: Qwen2.5-7B-Instruct)
 #
-# Model: Qwen/Qwen2.5-7B-Instruct  (bitsandbytes 4-bit NF4)
-#   - 7B params, fp16 load peak = 14GB → fits single T4 (16GB)
-#   - After 4-bit quant: ~4GB VRAM, 28GB free for KV cache
+# Model: Qwen/Qwen2.5-7B-Instruct  (fp16, split across T4 x2)
+#   - 7B params × 2 bytes = ~14GB fp16 → split across 2×16GB T4s
+#   - ~7GB per GPU, ~18GB free total for KV cache / generation
 #   - No thinking mode (Qwen2.5, not Qwen3) — clean JSON output
 #   - 29+ languages incl. Hindi, Telugu, Tamil, Kannada
 #   - 128K context window
@@ -62,13 +62,12 @@ def install(pkg):
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
-install("bitsandbytes")
 
 print("✓ Packages installed")
 
 # ── IMPORTS ──────────────────────────────────────────────────
 import json, time, re as _re, torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from supabase import create_client
 
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -78,18 +77,12 @@ print("✓ Supabase connected")
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 print(f"Loading {MODEL_ID} (4-bit NF4, ~4GB VRAM after quant)...")
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_compute_dtype=torch.float16,
-)
-
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN or None)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
-    quantization_config=bnb_config,
-    device_map={"": 0},        # all layers on GPU 0 — avoids bnb CPU-offload error
+    torch_dtype=torch.float16,
+    device_map="auto",
+    max_memory={0: "15GiB", 1: "15GiB"},  # both T4s, never CPU
     token=HF_TOKEN or None,
 )
 model.eval()
@@ -217,7 +210,7 @@ def generate_story(lang_info, theme, language):
         existing_titles,
     )
 
-    inputs = tokenizer(prompt, return_tensors="pt").to("cuda:0")
+    inputs = tokenizer(prompt, return_tensors="pt").to(next(model.parameters()).device)
 
     torch.cuda.empty_cache()
     output = model.generate(
