@@ -53,17 +53,31 @@ THEME_CONTEXT = {
 }
 
 # ── INSTALL ──────────────────────────────────────────────────
-import subprocess, sys
+import subprocess, sys, importlib
 
 def install(pkg):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])
 
+# compressed-tensors MUST come first — transformers checks for it at import time
+install("compressed-tensors")
+importlib.invalidate_caches()          # force Python to see newly installed pkg
+
 install("supabase")
 install("transformers>=4.45.0")
 install("accelerate")
-install("compressed-tensors")  # required for QuantTrio/sarvam-30b-AWQ
 install("autoawq")
 install("bitsandbytes")
+
+# Verify compressed_tensors is importable before proceeding
+try:
+    import compressed_tensors
+    print(f"✓ compressed_tensors {compressed_tensors.__version__} ready")
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--force-reinstall", "-q", "compressed-tensors"])
+    importlib.invalidate_caches()
+    import compressed_tensors
+    print(f"✓ compressed_tensors (reinstalled) {compressed_tensors.__version__} ready")
+
 print("✓ Packages installed")
 
 # ── IMPORTS ──────────────────────────────────────────────────
