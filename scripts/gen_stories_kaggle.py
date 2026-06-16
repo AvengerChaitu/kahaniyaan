@@ -97,7 +97,7 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
         f"Theme: {theme}\n"
         f"Theme context: {theme_ctx}\n"
         f"Address the child listener as \"{term}\" — use it naturally at least 4 times.\n"
-        f"Target length: 1500–2000 characters.\n"
+        f"Target length: 8000–9000 characters.\n"
         f"Age group: 5–8 years.\n\n"
         f"Story rules:\n"
         f"- 5-beat arc: vivid sensory hook → clear problem → 3 rising complications → climax → warm resolution\n"
@@ -105,20 +105,13 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
         f"- Rich sensory detail: smells, sounds, textures, colours specific to Indian settings\n"
         f"- Moral emerges from the character's own realisation — never state it as a lecture\n"
         f"- Narrator voice: warm grandmother telling this story from memory\n"
-        f"- Paragraphs separated by \\n\\n (escaped newlines, not actual line breaks)\n"
-        f"- Wrap 3–5 key story words in <strong>word</strong> tags\n"
         f"- Use \"{term}\" directly — no placeholder text\n"
         f"- Avoid these already-written titles: {avoid}\n\n"
-        f"CRITICAL JSON rules:\n"
-        f"- Return ONLY a single valid JSON object. No markdown, no code fences, no explanation.\n"
-        f"- Do NOT use double-quote characters (\") inside title, body, or moral text.\n"
-        f"  Use single quotes (') for dialogue instead.\n"
-        f"- All newlines in the body MUST be written as \\n (backslash + n), not actual line breaks.\n"
-        f"- The JSON must be parseable by Python json.loads() with no modification.\n\n"
-        f"Output format (copy exactly):\n"
-        f'{{"title": "story title in {lang_native}", '
-        f'"body": "full story text with \\\\n\\\\n between paragraphs", '
-        f'"moral": "one sentence moral in {lang_native}"}}'
+        f"Output format — use EXACTLY these three markers on their own lines:\n"
+        f"TITLE: <story title in {lang_native}>\n"
+        f"BODY:\n"
+        f"<full story text, paragraphs separated by blank lines>\n"
+        f"MORAL: <one sentence moral in {lang_native}>"
     )
 
     messages = [
@@ -127,83 +120,53 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
             "content": (
                 f"You are a master children's storyteller specialising in {lang_native} literature. "
                 "You write warm, vivid, emotionally resonant bedtime stories in grandmother narration style. "
-                "You ALWAYS return a single valid JSON object with no extra text before or after it. "
-                "You NEVER use double-quote characters inside string values — use single quotes for dialogue."
+                "You output ONLY the story using the TITLE/BODY/MORAL markers — no JSON, no code fences, no extra text."
             ),
         },
         {"role": "user", "content": instruction},
     ]
 
     try:
-        prompt = tokenizer.apply_chat_template(
+        return tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
     except Exception:
-        # Fallback for models without chat template
         sys_msg = messages[0]["content"]
         usr_msg = messages[1]["content"]
-        prompt = f"<|system|>\n{sys_msg}\n<|user|>\n{usr_msg}\n<|assistant|>\n"
-    # Seed the assistant turn with { so the model cannot generate prose before JSON
-    return prompt + "{"
+        return f"<|system|>\n{sys_msg}\n<|user|>\n{usr_msg}\n<|assistant|>\n"
 
-# ── JSON PARSER (multi-strategy) ─────────────────────────────
+# ── PLAIN TEXT PARSER ────────────────────────────────────────
 def parse_story_response(text):
-    # The prompt ended with { so the model continues from there — prepend it back
-    if not text.lstrip().startswith("{"):
-        text = "{" + text
-    # Strip any stray markdown fences
-    text = _re.sub(r'```(?:json)?', '', text).strip()
+    text = text.strip()
 
-    start = text.find("{")
-    end   = text.rfind("}") + 1
-    if start == -1 or end == 0:
-        raise ValueError("No JSON object found in response")
-    raw = text[start:end]
+    # Extract TITLE
+    title = ""
+    m = _re.search(r'TITLE:\s*(.+)', text)
+    if m:
+        title = m.group(1).strip()
 
-    # Strategy 1 — direct parse
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        pass
+    # Extract MORAL
+    moral = ""
+    m = _re.search(r'MORAL:\s*(.+)', text)
+    if m:
+        moral = m.group(1).strip()
 
-    # Strategy 2 — escape bare newlines inside string values
-    try:
-        fixed = _re.sub(
-            r'("(?:[^"\\]|\\.)*")',
-            lambda m: m.group(0).replace('\n', '\\n').replace('\r', ''),
-            raw, flags=_re.DOTALL,
-        )
-        return json.loads(fixed)
-    except json.JSONDecodeError:
-        pass
+    # Extract BODY (between BODY: and MORAL:)
+    body = ""
+    m = _re.search(r'BODY:\s*\n(.*?)(?=\nMORAL:|\Z)', text, _re.DOTALL)
+    if m:
+        body = m.group(1).strip()
 
-    # Strategy 3 — brute-force replace all bare newlines
-    try:
-        return json.loads(raw.replace('\r\n', '\\n').replace('\r', '\\n').replace('\n', '\\n'))
-    except json.JSONDecodeError:
-        pass
+    # Fallback: if no markers found, use full text as body
+    if not body:
+        lines = text.split('\n')
+        title = title or lines[0].strip()[:80]
+        body  = text
 
-    # Strategy 4 — regex field extraction
-    result = {}
-    for key in ('title', 'body', 'moral'):
-        m = _re.search(
-            rf'"{key}"\s*:\s*"((?:[^"\\]|\\.|\n)*?)"(?=\s*[,}}])',
-            raw, _re.DOTALL,
-        )
-        if m:
-            result[key] = m.group(1).replace('\\n', '\n').strip()
+    if not title:
+        title = "Untitled Story"
 
-    if all(k in result for k in ('title', 'body', 'moral')):
-        return result
-
-    # Final fallback — save raw text, fix JSON formatting later
-    lines = text.strip().split('\n')
-    title_guess = lines[0].strip()[:80] if lines else "Untitled Story"
-    return {
-        "title": title_guess or "Untitled Story",
-        "body":  text.strip(),
-        "moral": "",
-    }
+    return {"title": title, "body": body, "moral": moral}
 
 # ── GENERATION ───────────────────────────────────────────────
 @torch.inference_mode()
@@ -228,7 +191,7 @@ def generate_story(lang_info, theme, language):
     torch.cuda.empty_cache()
     output = model.generate(
         **inputs,
-        max_new_tokens=2000,
+        max_new_tokens=8000,
         do_sample=True,
         temperature=0.75,
         top_p=0.9,
