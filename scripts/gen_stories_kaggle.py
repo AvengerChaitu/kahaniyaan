@@ -90,86 +90,101 @@ model.eval()
 print("✓ Model loaded")
 
 # ── PROMPT BUILDER ───────────────────────────────────────────
-def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
-    avoid = ", ".join(f'"{t}"' for t in existing_titles[-20:]) or "none yet"
-    instruction = (
-        f"Write a children's bedtime story in {lang_native}.\n\n"
-        f"Theme: {theme}\n"
+SYSTEM_MSG = lambda lang: (
+    f"You are a master children's storyteller specialising in {lang} literature. "
+    "You write warm, vivid, emotionally resonant bedtime stories in grandmother narration style. "
+    "Output ONLY what is asked — no JSON, no code fences, no extra commentary."
+)
+
+def build_part_prompt(lang_native, term, theme, theme_ctx, part, prev_ending="", existing_titles=None):
+    avoid = ", ".join(f'"{t}"' for t in (existing_titles or [])[-20:]) or "none yet"
+
+    base_rules = (
+        f"Story theme: {theme}\n"
         f"Theme context: {theme_ctx}\n"
-        f"Address the child listener as \"{term}\" — use it naturally at least 4 times.\n"
-        f"Target length: 8000–9000 characters.\n"
-        f"Age group: 5–8 years.\n\n"
-        f"Story rules:\n"
-        f"- 5-beat arc: vivid sensory hook → clear problem → 3 rising complications → climax → warm resolution\n"
-        f"- Short punchy sentences at tense moments; long flowing sentences at calm moments\n"
-        f"- Rich sensory detail: smells, sounds, textures, colours specific to Indian settings\n"
-        f"- Moral emerges from the character's own realisation — never state it as a lecture\n"
-        f"- Narrator voice: warm grandmother telling this story from memory\n"
-        f"- Use \"{term}\" directly — no placeholder text\n"
-        f"- Avoid these already-written titles: {avoid}\n\n"
-        f"Output format — use EXACTLY these three markers on their own lines:\n"
-        f"TITLE: <story title in {lang_native}>\n"
-        f"BODY:\n"
-        f"<full story text, paragraphs separated by blank lines>\n"
-        f"MORAL: <one sentence moral in {lang_native}>"
+        f"Address the child as \"{term}\" naturally.\n"
+        f"Age group: 5–8 years. Narrator: warm grandmother voice.\n"
+        f"Rich sensory detail — smells, sounds, colours of Indian settings.\n"
+        f"Short punchy sentences at tense moments; flowing sentences at calm moments.\n"
     )
 
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                f"You are a master children's storyteller specialising in {lang_native} literature. "
-                "You write warm, vivid, emotionally resonant bedtime stories in grandmother narration style. "
-                "You output ONLY the story using the TITLE/BODY/MORAL markers — no JSON, no code fences, no extra text."
-            ),
-        },
-        {"role": "user", "content": instruction},
-    ]
-
-    try:
-        return tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
+    if part == 1:
+        instruction = (
+            f"Write Part 1 of 4 of a children's bedtime story in {lang_native}.\n\n"
+            + base_rules +
+            f"Avoid these already-written titles: {avoid}\n\n"
+            f"Part 1 must:\n"
+            f"- Introduce the main character and setting vividly\n"
+            f"- Establish the central problem or quest\n"
+            f"- End with a gentle cliffhanger that makes the child eager for Part 2\n"
+            f"- Be about 1800–2000 characters long\n\n"
+            f"Output format:\n"
+            f"TITLE: <story title in {lang_native}>\n"
+            f"BODY:\n"
+            f"<Part 1 story text>\n"
+            f"HOOK: <one exciting sentence hinting at Part 2>"
         )
+    elif part in (2, 3):
+        instruction = (
+            f"Continue the bedtime story in {lang_native}. This is Part {part} of 4.\n\n"
+            f"The previous part ended with:\n\"{prev_ending}\"\n\n"
+            + base_rules +
+            f"Part {part} must:\n"
+            f"- Continue naturally from where Part {part-1} ended\n"
+            f"- {'Deepen the problem and add a complication' if part == 2 else 'Build to the climax — the most tense moment of the story'}\n"
+            f"- End with a hook that makes the child need to hear Part {part+1}\n"
+            f"- Be about 1800–2000 characters long\n\n"
+            f"Output format:\n"
+            f"BODY:\n"
+            f"<Part {part} story text>\n"
+            f"HOOK: <one exciting sentence hinting at Part {part+1}>"
+        )
+    else:  # part 4
+        instruction = (
+            f"Write the final part (Part 4 of 4) of the bedtime story in {lang_native}.\n\n"
+            f"The previous part ended with:\n\"{prev_ending}\"\n\n"
+            + base_rules +
+            f"Part 4 must:\n"
+            f"- Resolve all story threads warmly and satisfyingly\n"
+            f"- Have the character learn their lesson through their own experience\n"
+            f"- End with a gentle, sleepy, comforting closing\n"
+            f"- Be about 1800–2000 characters long\n\n"
+            f"Output format:\n"
+            f"BODY:\n"
+            f"<Part 4 story text>\n"
+            f"MORAL: <one sentence moral in {lang_native}>"
+        )
+
+    messages = [
+        {"role": "system", "content": SYSTEM_MSG(lang_native)},
+        {"role": "user",   "content": instruction},
+    ]
+    try:
+        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     except Exception:
-        sys_msg = messages[0]["content"]
-        usr_msg = messages[1]["content"]
-        return f"<|system|>\n{sys_msg}\n<|user|>\n{usr_msg}\n<|assistant|>\n"
+        return f"<|system|>\n{SYSTEM_MSG(lang_native)}\n<|user|>\n{instruction}\n<|assistant|>\n"
 
-# ── PLAIN TEXT PARSER ────────────────────────────────────────
-def parse_story_response(text):
-    text = text.strip()
-
-    # Extract TITLE
-    title = ""
-    m = _re.search(r'TITLE:\s*(.+)', text)
-    if m:
-        title = m.group(1).strip()
-
-    # Extract MORAL
-    moral = ""
-    m = _re.search(r'MORAL:\s*(.+)', text)
-    if m:
-        moral = m.group(1).strip()
-
-    # Extract BODY (between BODY: and MORAL:)
-    body = ""
-    m = _re.search(r'BODY:\s*\n(.*?)(?=\nMORAL:|\Z)', text, _re.DOTALL)
-    if m:
-        body = m.group(1).strip()
-
-    # Fallback: if no markers found, use full text as body
-    if not body:
-        lines = text.split('\n')
-        title = title or lines[0].strip()[:80]
-        body  = text
-
-    if not title:
-        title = "Untitled Story"
-
-    return {"title": title, "body": body, "moral": moral}
-
-# ── GENERATION ───────────────────────────────────────────────
+# ── RAW GENERATION ───────────────────────────────────────────
 @torch.inference_mode()
+def generate_text(prompt):
+    inputs = tokenizer(prompt, return_tensors="pt").to("cuda:0")
+    torch.cuda.empty_cache()
+    output = model.generate(
+        **inputs,
+        max_new_tokens=2000,
+        do_sample=True,
+        temperature=0.75,
+        top_p=0.9,
+        repetition_penalty=1.1,
+        pad_token_id=tokenizer.eos_token_id,
+    )
+    return tokenizer.decode(output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
+
+def extract_field(text, marker):
+    m = _re.search(rf'{marker}:\s*\n?(.*?)(?=\n[A-Z]+:|\Z)', text, _re.DOTALL)
+    return m.group(1).strip() if m else ""
+
+# ── 4-PART STORY GENERATION ──────────────────────────────────
 def generate_story(lang_info, theme, language):
     existing_res = sb.table("story_templates") \
         .select("title") \
@@ -178,31 +193,33 @@ def generate_story(lang_info, theme, language):
         .execute()
     existing_titles = [r["title"] for r in existing_res.data]
 
-    prompt = build_prompt(
-        lang_info["native"],
-        lang_info["term"],
-        theme,
-        THEME_CONTEXT[theme],
-        existing_titles,
-    )
+    parts_text = []
+    title  = ""
+    moral  = ""
+    hook   = ""
 
-    inputs = tokenizer(prompt, return_tensors="pt").to("cuda:0")
+    for part in range(1, 5):
+        print(f"    part {part}/4...", end=" ", flush=True)
+        prompt = build_part_prompt(
+            lang_info["native"], lang_info["term"],
+            theme, THEME_CONTEXT[theme],
+            part, prev_ending=hook,
+            existing_titles=existing_titles if part == 1 else None,
+        )
+        raw = generate_text(prompt)
 
-    torch.cuda.empty_cache()
-    output = model.generate(
-        **inputs,
-        max_new_tokens=8000,
-        do_sample=True,
-        temperature=0.75,
-        top_p=0.9,
-        repetition_penalty=1.1,
-        pad_token_id=tokenizer.eos_token_id,
-    )
+        if part == 1:
+            title = extract_field(raw, "TITLE") or raw.split('\n')[0][:80]
+        body_part = extract_field(raw, "BODY") or raw
+        hook      = extract_field(raw, "HOOK") or raw[-200:]
+        if part == 4:
+            moral = extract_field(raw, "MORAL")
 
-    raw = tokenizer.decode(
-        output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True
-    )
-    return parse_story_response(raw)
+        parts_text.append(body_part)
+        print(f"{len(body_part)} chars")
+
+    full_body = "\n\n---\n\n".join(parts_text)
+    return {"title": title or "Untitled Story", "body": full_body, "moral": moral}
 
 # ── MAIN LOOP ────────────────────────────────────────────────
 if isinstance(LANGUAGE_FILTER, str):
