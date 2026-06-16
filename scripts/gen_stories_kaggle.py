@@ -97,7 +97,7 @@ def build_prompt(lang_native, term, theme, theme_ctx, existing_titles):
         f"Theme: {theme}\n"
         f"Theme context: {theme_ctx}\n"
         f"Address the child listener as \"{term}\" — use it naturally at least 4 times.\n"
-        f"Target length: 8000–9000 characters.\n"
+        f"Target length: 1500–2000 characters.\n"
         f"Age group: 5–8 years.\n\n"
         f"Story rules:\n"
         f"- 5-beat arc: vivid sensory hook → clear problem → 3 rising complications → climax → warm resolution\n"
@@ -228,7 +228,7 @@ def generate_story(lang_info, theme, language):
     torch.cuda.empty_cache()
     output = model.generate(
         **inputs,
-        max_new_tokens=8000,
+        max_new_tokens=2000,
         do_sample=True,
         temperature=0.75,
         top_p=0.9,
