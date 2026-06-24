@@ -3,29 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ClerkProvider, Show, SignInButton, UserButton, SignOutButton } from "@clerk/nextjs";
-import { Playfair_Display, Lora, Dancing_Script } from "next/font/google";
+import { Pacifico, Plus_Jakarta_Sans } from "next/font/google";
 import { useEffect, useState } from "react";
 import "./globals.css";
 
-const playfair = Playfair_Display({
+const pacifico = Pacifico({
+  weight: "400",
   variable: "--font-display",
   subsets: ["latin"],
 });
 
-const lora = Lora({
+const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
-});
-
-const dancingScript = Dancing_Script({
-  variable: "--font-script",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const pathname = usePathname();
+  const [scrolled, setScrolled]   = useState(false);
+  const [menuOpen, setMenuOpen]   = useState(false);
+  const pathname                  = usePathname();
   const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
   useEffect(() => {
@@ -37,63 +34,70 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
   return (
-    <html lang="en" className={`${playfair.variable} ${lora.variable} ${dancingScript.variable}`}>
-      <body className="min-h-dvh flex flex-col bg-[#1a1428] font-sans antialiased">
+    <html lang="en" className={`${pacifico.variable} ${plusJakarta.variable}`}>
+      <body style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", background: "#FFFBF6" }}>
         <ClerkProvider>
-          <nav className={`navbar${scrolled ? " solid" : ""}`}>
-            <Link className="logo" href="/">Dadi<em>ma</em></Link>
-            {!isAuthPage && (
-              <ul className="nav-links">
-                <li><Link className="nav-link" href="/#themes">Themes</Link></li>
-                <li><Link className="nav-link" href="/#generator">Try it</Link></li>
-                <li><Link className="nav-link" href="/#pricing">Pricing</Link></li>
-                <li><Link className={`nav-link${pathname === "/" ? " active" : ""}`} href="/">Create</Link></li>
-                <li><Link className={`nav-link${pathname === "/library" ? " active" : ""}`} href="/library">Library</Link></li>
-                <li><Link className={`nav-link${pathname === "/account" ? " active" : ""}`} href="/account">Account</Link></li>
-              </ul>
-            )}
-            {!isAuthPage && (
-              <>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {!isAuthPage && (
+            <nav className={`dm-nav${scrolled ? " dm-nav--scrolled" : ""}`}>
+              <Link href="/" className="dm-logo">
+                Dadi<span className="dm-logo-accent">Ma</span><span className="dm-logo-emoji">🪔</span>
+              </Link>
+
+              <div className="dm-nav-links">
+                <Link href="/#themes">Stories</Link>
+                <Link href="/#languages">Languages</Link>
+                <Link href="/#pricing">Pricing</Link>
+                <Link href="/library">Library</Link>
+              </div>
+
+              <div className="dm-nav-actions">
+                <Show when="signed-out">
+                  <SignInButton mode="modal">
+                    <button className="dm-btn-text">Login</button>
+                  </SignInButton>
+                  <SignInButton mode="modal">
+                    <button className="dm-btn-primary">Start free</button>
+                  </SignInButton>
+                </Show>
+                <Show when="signed-in">
+                  <Link href="/library" className="dm-btn-text" style={{ textDecoration: "none" }}>Library</Link>
+                  <UserButton />
+                  <SignOutButton redirectUrl="/">
+                    <button className="dm-btn-text">Log out</button>
+                  </SignOutButton>
+                </Show>
+              </div>
+
+              <button
+                className={`hamburger-btn${menuOpen ? " open" : ""}`}
+                onClick={() => setMenuOpen(v => !v)}
+                aria-label="Menu"
+              >
+                <span />
+              </button>
+
+              {menuOpen && (
+                <div className="mobile-overlay" onClick={() => setMenuOpen(false)}>
+                  <Link href="/#themes"     onClick={() => setMenuOpen(false)}>Stories</Link>
+                  <Link href="/#languages"  onClick={() => setMenuOpen(false)}>Languages</Link>
+                  <Link href="/#pricing"    onClick={() => setMenuOpen(false)}>Pricing</Link>
+                  <Link href="/library"     onClick={() => setMenuOpen(false)}>Library</Link>
                   <Show when="signed-out">
                     <SignInButton mode="modal">
-                      <button className="nav-signin">Sign in</button>
+                      <button className="dm-btn-primary" onClick={() => setMenuOpen(false)}>Start free</button>
                     </SignInButton>
                   </Show>
                   <Show when="signed-in">
-                    <div className="nav-user-wrap">
-                      <UserButton />
-                      <SignOutButton redirectUrl="/">
-                        <button className="nav-signin" style={{ padding: "0.4rem 1rem", fontSize: "0.78rem" }}>
-                          Log out
-                        </button>
-                      </SignOutButton>
-                    </div>
+                    <SignOutButton redirectUrl="/">
+                      <button className="dm-btn-outline" onClick={() => setMenuOpen(false)}>Log out</button>
+                    </SignOutButton>
                   </Show>
                 </div>
-                <button className={`hamburger-btn${menuOpen ? " open" : ""}`}
-                  onClick={() => setMenuOpen(v => !v)} aria-label="Menu">
-                  <span></span>
-                </button>
-              </>
-            )}
-            {menuOpen && (
-              <div className="mobile-overlay" onClick={() => setMenuOpen(false)}>
-                <a href="/#themes" onClick={() => setMenuOpen(false)}>Themes</a>
-                <a href="/#generator" onClick={() => setMenuOpen(false)}>Try it</a>
-                <a href="/#pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
-                <a href="/" onClick={() => setMenuOpen(false)}>Create</a>
-                <a href="/library" onClick={() => setMenuOpen(false)}>Library</a>
-                <a href="/account" onClick={() => setMenuOpen(false)}>Account</a>
-                <Show when="signed-out">
-                  <SignInButton mode="modal">
-                    <button onClick={() => setMenuOpen(false)}>Sign in</button>
-                  </SignInButton>
-                </Show>
-              </div>
-            )}
-          </nav>
-          <main className="flex-1">
+              )}
+            </nav>
+          )}
+
+          <main style={{ flex: 1 }}>
             {children}
           </main>
         </ClerkProvider>
