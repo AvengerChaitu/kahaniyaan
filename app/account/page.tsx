@@ -174,9 +174,11 @@ export default function AccountPage() {
 
       {/* Profile */}
       <div style={{ ...card, display: "flex", alignItems: "center", gap: 16 }}>
-        <div style={{ width: 48, height: 48, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "2px solid #E0D9FF" }}>
-          <UserButton />
-        </div>
+        <UserButton
+          userProfileUrl="/account"
+          userProfileMode="navigation"
+          appearance={{ elements: { avatarBox: { width: 48, height: 48 }, userButtonTrigger: { padding: 0 } } }}
+        />
         <div>
           <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>{user?.fullName || user?.primaryEmailAddress?.emailAddress}</div>
           <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 2 }}>{user?.primaryEmailAddress?.emailAddress}</div>

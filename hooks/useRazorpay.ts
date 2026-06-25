@@ -31,8 +31,9 @@ export async function openRazorpayCheckout(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan }),
   });
-  if (!orderRes.ok) { onError("Could not initiate payment. Try again."); return; }
-  const { orderId, amount, keyId, label } = await orderRes.json();
+  const orderData = await orderRes.json().catch(() => ({}));
+  if (!orderRes.ok) { onError(orderData.error || "Could not initiate payment. Try again."); return; }
+  const { orderId, amount, keyId, label } = orderData;
 
   // 2. Load Razorpay script
   const loaded = await loadScript();
