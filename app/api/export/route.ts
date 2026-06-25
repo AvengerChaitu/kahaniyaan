@@ -10,19 +10,20 @@ export async function GET(req: NextRequest) {
 
   const { data: stories, error } = await supabaseAdmin
     .from("stories")
-    .select("title, body, language, theme, child_name, age, moral, created_at")
+    .select("*")
     .eq("clerk_user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Export error:", error);
-    return NextResponse.json({ error: "Failed to export stories" }, { status: 500 });
+    return NextResponse.json({ error: error.message ?? "Failed to export stories" }, { status: 500 });
   }
 
   const rows = stories ?? [];
 
   if (format === "csv") {
     const headers = ["title", "child_name", "age", "language", "theme", "moral", "created_at", "body"];
+    // only export user-facing columns (skip id, clerk_user_id)
     const escape  = (v: string | null | undefined) =>
       v == null ? "" : `"${String(v).replace(/"/g, '""').replace(/\n/g, " ")}"`;
 

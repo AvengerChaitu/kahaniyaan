@@ -1,4 +1,32 @@
+"use client";
+
+import { useState } from "react";
+
 export default function Footer() {
+  const [email,   setEmail]   = useState("");
+  const [status,  setStatus]  = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [errMsg,  setErrMsg]  = useState("");
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus("loading");
+    setErrMsg("");
+    try {
+      const res  = await fetch("/api/newsletter", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErrMsg(data.error || "Try again."); setStatus("error"); return; }
+      setStatus("done");
+      setEmail("");
+    } catch {
+      setErrMsg("Something went wrong."); setStatus("error");
+    }
+  }
+
   return (
     <footer className="dm-footer">
       <div className="dm-footer-grid">
@@ -35,10 +63,30 @@ export default function Footer() {
         <div className="dm-footer-col">
           <div className="dm-footer-heading">Stay updated</div>
           <p className="dm-footer-desc">Get new stories and updates</p>
-          <form className="dm-newsletter" onSubmit={(e) => e.preventDefault()}>
-            <input type="email" placeholder="Enter your email" aria-label="Email address" />
-            <button type="submit">Subscribe</button>
-          </form>
+
+          {status === "done" ? (
+            <div style={{ fontSize: 13, color: "#059669", fontWeight: 600, padding: "10px 0" }}>
+              ✓ You&apos;re subscribed!
+            </div>
+          ) : (
+            <form className="dm-newsletter" onSubmit={handleSubscribe}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                aria-label="Email address"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                disabled={status === "loading"}
+                required
+              />
+              <button type="submit" disabled={status === "loading"}>
+                {status === "loading" ? "…" : "Subscribe"}
+              </button>
+            </form>
+          )}
+          {status === "error" && (
+            <p style={{ fontSize: 12, color: "#EF4444", marginTop: 6 }}>{errMsg}</p>
+          )}
         </div>
       </div>
 
