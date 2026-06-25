@@ -1,7 +1,39 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser, useClerk, SignInButton, UserButton } from "@clerk/nextjs";
+import { useUser, useClerk, useSession, SignInButton, UserButton } from "@clerk/nextjs";
+
+interface SessionActivity {
+  id: string;
+  browserName?: string;
+  deviceType?: string;
+  isMobile?: boolean;
+}
+interface DeviceSession {
+  id: string;
+  lastActiveAt: Date;
+  latestActivity: SessionActivity;
+  revoke: () => Promise<unknown>;
+}
+
+function deviceLabel(activity: SessionActivity): { icon: string; name: string } {
+  const mobile = activity.isMobile || activity.deviceType === "mobile";
+  const browser = activity.browserName ?? "";
+  if (mobile) {
+    const isIOS = /safari/i.test(browser) && !/chrome/i.test(browser);
+    return isIOS
+      ? { icon: "📱", name: "iPhone / iPad" }
+      : { icon: "📱", name: "Android" };
+  }
+  return { icon: "💻", name: "Computer" };
+}
+
+function relativeTime(date: Date): string {
+  const diff = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+  if (diff === 0) return "Active today";
+  if (diff === 1) return "Active yesterday";
+  return `Active ${diff} days ago`;
+}
 
 const card: React.CSSProperties = {
   background: "#fff",
@@ -29,6 +61,7 @@ const row: React.CSSProperties = {
 export default function AccountPage() {
   const { isSignedIn, user } = useUser();
   const { signOut } = useClerk();
+  const { session: currentSession } = useSession();
 
   const [usage, setUsage] = useState<{ story_count: number; is_paid: boolean } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -37,6 +70,8 @@ export default function AccountPage() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [devices, setDevices] = useState<DeviceSession[]>([]);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isSignedIn) {
@@ -44,8 +79,11 @@ export default function AccountPage() {
         .then(r => r.json())
         .then(d => setUsage(d))
         .catch(console.error);
+      user?.getSessions()
+        .then(sessions => setDevices(sessions as DeviceSession[]))
+        .catch(console.error);
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, user]);
 
   const handleCancelSubscription = async () => {
     if (!confirm("Cancel your Premium subscription? You keep access until end of current billing period.")) return;
@@ -69,6 +107,14 @@ export default function AccountPage() {
     } catch {
       setDeleting(false);
     }
+  };
+
+  const handleRevokeSession = async (session: DeviceSession) => {
+    if (!confirm("Sign out this device?")) return;
+    setRevokingId(session.id);
+    await session.revoke();
+    setDevices(prev => prev.filter(s => s.id !== session.id));
+    setRevokingId(null);
   };
 
   const handleExport = async () => {
@@ -171,6 +217,48 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+
+      {/* Active devices */}
+      {devices.length > 0 && (
+        <div style={card}>
+          <div style={label}>Active devices</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {devices.map(s => {
+              const { icon, name } = deviceLabel(s.latestActivity);
+              const isCurrent = s.id === currentSession?.id;
+              return (
+                <div key={s.id} style={{ ...row, gap: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 24, flexShrink: 0 }}>{icon}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>{name}</span>
+                        {isCurrent && (
+                          <span style={{ fontSize: 10, fontWeight: 800, color: "#7C5CFC", background: "#F5F3FF", padding: "2px 8px", borderRadius: 999 }}>
+                            This device
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>
+                        {relativeTime(new Date(s.lastActiveAt))}
+                      </div>
+                    </div>
+                  </div>
+                  {!isCurrent && (
+                    <button
+                      onClick={() => handleRevokeSession(s)}
+                      disabled={revokingId === s.id}
+                      style={{ background: "none", color: "#9CA3AF", border: "1.5px solid #ECECEC", padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", flexShrink: 0 }}
+                    >
+                      {revokingId === s.id ? "…" : "Sign out"}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Data & Privacy */}
       <div style={card}>
