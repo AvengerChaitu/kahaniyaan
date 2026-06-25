@@ -24,17 +24,17 @@ export default function Footer() {
 
         <div className="dm-footer-col">
           <div className="dm-footer-heading">Company</div>
-          <a href="#">About us</a>
-          <a href="#">Blog</a>
-          <a href="#">Contact</a>
-          <a href="#">Privacy policy</a>
+          <a href="/about">About us</a>
+          <a href="/blog">Blog</a>
+          <a href="/contact">Contact</a>
+          <a href="/privacy">Privacy policy</a>
         </div>
 
         <div className="dm-footer-col">
           <div className="dm-footer-heading">Support</div>
-          <a href="#">Help center</a>
-          <a href="#">Terms of service</a>
-          <a href="#">Refund policy</a>
+          <a href="/help">Help center</a>
+          <a href="/terms">Terms of service</a>
+          <a href="/refund">Refund policy</a>
         </div>
 
         <div className="dm-footer-col">
