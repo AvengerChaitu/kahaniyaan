@@ -75,6 +75,9 @@ export default function AccountPage() {
   const [upgradeMsg, setUpgradeMsg] = useState("");
   const [devices, setDevices] = useState<DeviceSession[]>([]);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCount, setReferralCount] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (isSignedIn) {
@@ -85,8 +88,24 @@ export default function AccountPage() {
       user?.getSessions()
         .then(sessions => setDevices(sessions as DeviceSession[]))
         .catch(console.error);
+      fetch("/api/referral")
+        .then(r => r.json())
+        .then(d => { setReferralCode(d.code); setReferralCount((d.referrals ?? []).length); })
+        .catch(console.error);
     }
   }, [isSignedIn, user]);
+
+  const referralLink = referralCode
+    ? `${typeof window !== "undefined" ? window.location.origin : "https://dadima.app"}/sign-up?ref=${referralCode}`
+    : null;
+
+  const handleCopyReferral = () => {
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const handleCancelSubscription = async () => {
     if (!confirm("Cancel your Premium subscription? You keep access until end of current billing period.")) return;
@@ -239,6 +258,49 @@ export default function AccountPage() {
           <div style={{ marginTop: 12, height: 6, background: "#F3F4F6", borderRadius: 999, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${Math.min(100, (storyCount / 3) * 100)}%`, background: storyCount >= 3 ? "#EF4444" : "#7C5CFC", borderRadius: 999, transition: "width .4s" }} />
           </div>
+        )}
+      </div>
+
+      {/* Referral */}
+      <div style={{ ...card, background: "linear-gradient(135deg,#F5F3FF 0%,#FFF7ED 100%)", border: "1.5px solid #E0D9FF" }}>
+        <div style={label}>Invite friends</div>
+        <div style={{ fontSize: 14, color: "#374151", marginBottom: 4, fontWeight: 600 }}>
+          Get +3 stories for every friend who signs up 🎁
+        </div>
+        <div style={{ fontSize: 13, color: "#9CA3AF", marginBottom: 16 }}>
+          Your friend also gets +3 bonus stories when they join using your link.
+        </div>
+
+        {referralCode ? (
+          <>
+            <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+              <div style={{
+                flex: 1, background: "#fff", border: "1.5px solid #E0D9FF",
+                borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "#6B7280",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {referralLink}
+              </div>
+              <button
+                onClick={handleCopyReferral}
+                style={{
+                  background: copied ? "#059669" : "#7C5CFC",
+                  color: "#fff", border: "none", padding: "10px 18px",
+                  borderRadius: 10, fontSize: 13, fontWeight: 700,
+                  cursor: "pointer", flexShrink: 0, transition: "background .2s",
+                }}
+              >
+                {copied ? "✓ Copied!" : "Copy link"}
+              </button>
+            </div>
+            {referralCount > 0 && (
+              <div style={{ marginTop: 12, fontSize: 13, color: "#5B21B6", fontWeight: 600 }}>
+                🎉 {referralCount} friend{referralCount !== 1 ? "s" : ""} joined using your link — you&apos;ve earned +{referralCount * 3} bonus stories!
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{ fontSize: 13, color: "#9CA3AF" }}>Generating your link…</div>
         )}
       </div>
 
