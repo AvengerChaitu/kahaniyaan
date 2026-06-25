@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { razorpay, PLANS } from "@/lib/razorpay";
+import { getRazorpay, PLANS } from "@/lib/razorpay";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const planData = PLANS[plan as keyof typeof PLANS];
   if (!planData) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
-  const order = await razorpay.orders.create({
+  const order = await getRazorpay().orders.create({
     amount:   planData.amount,
     currency: "INR",
     notes:    { clerk_user_id: userId, plan },
