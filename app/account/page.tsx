@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser, useClerk, useSession, SignInButton, UserButton } from "@clerk/nextjs";
-import { openRazorpayCheckout } from "@/hooks/useRazorpay";
+import { openPaytmCheckout } from "@/hooks/usePaytm";
 
 interface SessionActivity {
   id: string;
@@ -134,9 +134,8 @@ export default function AccountPage() {
   const handleUpgrade = async () => {
     setUpgrading(true);
     setUpgradeMsg("");
-    await openRazorpayCheckout(
+    await openPaytmCheckout(
       "premium",
-      user?.primaryEmailAddress?.emailAddress ?? "",
       () => { setUpgrading(false); setUpgradeMsg("🎉 Upgraded! Refresh to see your new plan."); setUsage(prev => prev ? { ...prev, is_paid: true } : prev); },
       (err) => { setUpgrading(false); setUpgradeMsg(err); }
     );

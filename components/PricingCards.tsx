@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { openRazorpayCheckout } from "@/hooks/useRazorpay";
+import { openPaytmCheckout } from "@/hooks/usePaytm";
 
 interface Props {
   onStartFree: () => void;
@@ -35,12 +35,11 @@ export default function PricingCards({ onStartFree }: Props) {
   const [msg, setMsg] = useState("");
 
   async function handleUpgrade(plan: "premium" | "family") {
-    if (!isSignedIn) return; // SignInButton wrapper handles this
+    if (!isSignedIn) return;
     setLoading(plan);
     setMsg("");
-    await openRazorpayCheckout(
+    await openPaytmCheckout(
       plan,
-      user?.primaryEmailAddress?.emailAddress ?? "",
       () => { setLoading(null); setMsg("🎉 You're now on Premium! Refresh to see your plan."); },
       (err) => { setLoading(null); setMsg(err); }
     );
