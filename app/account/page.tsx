@@ -132,15 +132,15 @@ export default function AccountPage() {
     setRevokingId(null);
   };
 
-  const handleExport = async () => {
+  const handleExport = async (fmt: "json" | "csv") => {
     setExporting(true);
     try {
-      const res = await fetch("/api/export");
+      const res = await fetch(`/api/export?format=${fmt}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "dadima-stories.json";
+      a.download = `dadima-stories.${fmt}`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -290,16 +290,25 @@ export default function AccountPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={row}>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>Export my data</div>
-              <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>Download all your stories as JSON</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>Export my stories</div>
+              <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>Download all saved stories</div>
             </div>
-            <button
-              onClick={handleExport}
-              disabled={exporting}
-              style={{ background: "#F5F3FF", color: "#7C5CFC", border: "1.5px solid #E0D9FF", padding: "8px 16px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer" }}
-            >
-              {exporting ? "Exporting…" : "Export"}
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => handleExport("json")}
+                disabled={exporting}
+                style={{ background: "#F5F3FF", color: "#7C5CFC", border: "1.5px solid #E0D9FF", padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+              >
+                {exporting ? "…" : "JSON"}
+              </button>
+              <button
+                onClick={() => handleExport("csv")}
+                disabled={exporting}
+                style={{ background: "#F5F3FF", color: "#7C5CFC", border: "1.5px solid #E0D9FF", padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+              >
+                {exporting ? "…" : "CSV"}
+              </button>
+            </div>
           </div>
           <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 12, ...row }}>
             <div>

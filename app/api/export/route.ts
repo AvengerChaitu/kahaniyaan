@@ -1,21 +1,51 @@
 import { auth } from "@clerk/nextjs/server";
-import { supabase } from "@/lib/supabase";
-import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: stories } = await supabase
+  const format = req.nextUrl.searchParams.get("format") ?? "json"; // ?format=csv
+
+  const { data: stories, error } = await supabaseAdmin
     .from("stories")
     .select("title, body, language, theme, child_name, age, moral, created_at")
     .eq("clerk_user_id", userId)
     .order("created_at", { ascending: false });
 
+  if (error) {
+    console.error("Export error:", error);
+    return NextResponse.json({ error: "Failed to export stories" }, { status: 500 });
+  }
+
+  const rows = stories ?? [];
+
+  if (format === "csv") {
+    const headers = ["title", "child_name", "age", "language", "theme", "moral", "created_at", "body"];
+    const escape  = (v: string | null | undefined) =>
+      v == null ? "" : `"${String(v).replace(/"/g, '""').replace(/\n/g, " ")}"`;
+
+    const csv = [
+      headers.join(","),
+      ...rows.map(s =>
+        headers.map(h => escape(s[h as keyof typeof s] as string)).join(",")
+      ),
+    ].join("\r\n");
+
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="dadima-stories.csv"',
+      },
+    });
+  }
+
+  // Default: JSON
   const exportData = {
-    exported_at: new Date().toISOString(),
-    total_stories: stories?.length ?? 0,
-    stories: stories ?? [],
+    exported_at:   new Date().toISOString(),
+    total_stories: rows.length,
+    stories:       rows,
   };
 
   return new NextResponse(JSON.stringify(exportData, null, 2), {
