@@ -10,16 +10,25 @@ export async function POST(req: NextRequest) {
   const planData = PLANS[plan as keyof typeof PLANS];
   if (!planData) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
-  const order = await getRazorpay().orders.create({
-    amount:   planData.amount,
-    currency: "INR",
-    notes:    { clerk_user_id: userId, plan },
-  });
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    return NextResponse.json({ error: "Payments not configured yet. Please contact hello@dadima.app." }, { status: 503 });
+  }
 
-  return NextResponse.json({
-    orderId: order.id,
-    amount:  planData.amount,
-    keyId:   process.env.RAZORPAY_KEY_ID,
-    label:   planData.label,
-  });
+  try {
+    const order = await getRazorpay().orders.create({
+      amount:   planData.amount,
+      currency: "INR",
+      notes:    { clerk_user_id: userId, plan },
+    });
+
+    return NextResponse.json({
+      orderId: order.id,
+      amount:  planData.amount,
+      keyId:   process.env.RAZORPAY_KEY_ID,
+      label:   planData.label,
+    });
+  } catch (err) {
+    console.error("Razorpay order error:", err);
+    return NextResponse.json({ error: "Could not create payment order. Try again." }, { status: 500 });
+  }
 }

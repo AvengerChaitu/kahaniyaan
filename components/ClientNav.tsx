@@ -45,7 +45,7 @@ export default function ClientNav() {
         </Show>
         <Show when="signed-in">
           <Link href="/library" className="dm-btn-text" style={{ textDecoration: "none" }}>Library</Link>
-          <Link href="/account" style={{ textDecoration: "none" }}><UserButton /></Link>
+          <UserButton userProfileUrl="/account" userProfileMode="navigation" />
           <SignOutButton redirectUrl="/">
             <button className="dm-btn-text">Log out</button>
           </SignOutButton>
