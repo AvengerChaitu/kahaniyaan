@@ -214,7 +214,6 @@ export default function HomePage() {
       {/* ── Pricing ── */}
       <PricingCards
         onStartFree={() => document.getElementById("generator")?.scrollIntoView({ behavior: "smooth" })}
-        onShowComing={setShowComing}
       />
 
       {/* ── Footer ── */}

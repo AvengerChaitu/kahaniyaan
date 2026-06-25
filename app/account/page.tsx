@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser, useClerk, useSession, SignInButton, UserButton } from "@clerk/nextjs";
+import { openRazorpayCheckout } from "@/hooks/useRazorpay";
 
 interface SessionActivity {
   id: string;
@@ -70,6 +71,8 @@ export default function AccountPage() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+  const [upgradeMsg, setUpgradeMsg] = useState("");
   const [devices, setDevices] = useState<DeviceSession[]>([]);
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
@@ -107,6 +110,18 @@ export default function AccountPage() {
     } catch {
       setDeleting(false);
     }
+  };
+
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    setUpgradeMsg("");
+    await openRazorpayCheckout(
+      "premium",
+      user?.primaryEmailAddress?.emailAddress ?? "",
+      () => { setUpgrading(false); setUpgradeMsg("🎉 Upgraded! Refresh to see your new plan."); setUsage(prev => prev ? { ...prev, is_paid: true } : prev); },
+      (err) => { setUpgrading(false); setUpgradeMsg(err); }
+    );
+    setUpgrading(false);
   };
 
   const handleRevokeSession = async (session: DeviceSession) => {
@@ -184,10 +199,11 @@ export default function AccountPage() {
           </div>
           {!isPaid && (
             <button
-              onClick={() => window.location.href = "/#pricing"}
-              style={{ background: "#7C5CFC", color: "#fff", border: "none", padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,92,252,.25)" }}
+              onClick={handleUpgrade}
+              disabled={upgrading}
+              style={{ background: "#7C5CFC", color: "#fff", border: "none", padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,92,252,.25)", opacity: upgrading ? .7 : 1 }}
             >
-              Upgrade
+              {upgrading ? "Opening…" : "Upgrade ₹199/mo"}
             </button>
           )}
           {isPaid && !cancelled && (
@@ -201,6 +217,12 @@ export default function AccountPage() {
           )}
         </div>
       </div>
+
+      {upgradeMsg && (
+        <div style={{ background: upgradeMsg.startsWith("🎉") ? "#F0FDF4" : "#FEF2F2", border: `1.5px solid ${upgradeMsg.startsWith("🎉") ? "#BBF7D0" : "#FECACA"}`, borderRadius: 12, padding: "12px 20px", fontSize: 14, color: upgradeMsg.startsWith("🎉") ? "#166534" : "#991B1B", marginBottom: 12 }}>
+          {upgradeMsg}
+        </div>
+      )}
 
       {/* Usage */}
       <div style={card}>

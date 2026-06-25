@@ -6,12 +6,37 @@ import { createHash } from "crypto";
 
 const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 
+// In-memory IP rate limiter: 5 requests per 10 minutes per IP
+const ipRateMap = new Map<string, { count: number; resetAt: number }>();
+function checkIpRate(ip: string): boolean {
+  const now    = Date.now();
+  const window = 10 * 60 * 1000; // 10 min
+  const limit  = 5;
+  const entry  = ipRateMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    ipRateMap.set(ip, { count: 1, resetAt: now + window });
+    return true;
+  }
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
 function computeTtsUrl(body: string, language: string): string {
   const hash = createHash("md5").update(`${language}:${body}`).digest("hex");
   return `https://res.cloudinary.com/${CLOUD_NAME}/raw/upload/tts/${language}/${hash}.mp3`;
 }
 
 export async function POST(req: NextRequest) {
+  // IP-based rate limit (protects against unauthenticated / burst abuse)
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  if (!checkIpRate(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a few minutes and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { name, age, language, theme, excludeIds } = await req.json();
 
