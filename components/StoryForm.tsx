@@ -1,5 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
+const GENERATE_MSGS = [
+  "Grandma is picking the perfect tale…",
+  "Sprinkling some magic dust…",
+  "Weaving the story just for you…",
+  "Adding the moral touch…",
+  "Your adventure is almost here…",
+];
+
 interface Props {
   childName: string;
   selectedAge: string;
@@ -39,6 +49,13 @@ export default function StoryForm({
   onNameChange, onAgeChange, onLangChange, onThemeChange, onGenerate,
 }: Props) {
   const canGenerate = !loading && !!childName.trim();
+  const [msgIdx, setMsgIdx] = useState(0);
+
+  useEffect(() => {
+    if (!loading) { setMsgIdx(0); return; }
+    const id = setInterval(() => setMsgIdx(i => (i + 1) % GENERATE_MSGS.length), 2200);
+    return () => clearInterval(id);
+  }, [loading]);
 
   return (
     <div style={{
@@ -116,21 +133,27 @@ export default function StoryForm({
       <button
         disabled={!canGenerate}
         onClick={onGenerate}
+        className={loading ? "dm-btn-shimmer" : ""}
         style={{
           width: "100%", padding: "14px 20px", borderRadius: 12,
           background: canGenerate ? "#7C5CFC" : "#F3F4F6",
           color: canGenerate ? "#fff" : "#9CA3AF",
           border: "none", fontSize: 15, fontWeight: 700,
           fontFamily: "inherit", cursor: canGenerate ? "pointer" : "not-allowed",
-          transition: "all .2s",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          transition: "background .2s, box-shadow .2s",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
           boxShadow: canGenerate ? "0 4px 16px rgba(124,92,252,.3)" : "none",
+          minHeight: 50,
         }}
       >
-        {loading
-          ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⏳</span> Generating...</>
-          : <>Generate {childName.trim() ? `${childName.trim()}'s` : "your child's"} story</>
-        }
+        {loading ? (
+          <>
+            <span className="dm-spinner" />
+            <span style={{ transition: "opacity .3s" }}>{GENERATE_MSGS[msgIdx]}</span>
+          </>
+        ) : (
+          <>✨ Generate {childName.trim() ? `${childName.trim()}'s` : "your child's"} story</>
+        )}
       </button>
     </div>
   );

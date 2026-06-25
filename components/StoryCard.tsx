@@ -3,6 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Show, SignInButton } from "@clerk/nextjs";
 
+const STORY_MSGS = [
+  "Grandma is picking the perfect tale…",
+  "Sprinkling some magic dust…",
+  "Weaving the story just for you…",
+  "Adding the moral touch…",
+  "Your adventure is almost here…",
+];
+
 interface Story {
   title: string; body: string; language: string; theme: string;
   age: string; childName: string; moral?: string; moralLabel?: string; ttsUrl?: string;
@@ -33,6 +41,13 @@ const actionBtn: React.CSSProperties = {
 export default function StoryCard({ story, loading, displayName, readingTime, saved, saving, tts, onSave, onPdf, onNew }: Props) {
   const [directPlaying, setDirectPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [msgIdx, setMsgIdx] = useState(0);
+
+  useEffect(() => {
+    if (!loading) { setMsgIdx(0); return; }
+    const id = setInterval(() => setMsgIdx(i => (i + 1) % STORY_MSGS.length), 2200);
+    return () => clearInterval(id);
+  }, [loading]);
 
   function fallbackSpeak() {
     tts.speak((story?.body || "").replace(/<[^>]*>/g, ""), story?.language || "Hindi");
@@ -79,15 +94,42 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
   /* ── Loading state ── */
   if (loading) {
     return (
-      <div style={{ ...cardBase, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
-        <div style={{ fontSize: 56, animation: "spin 2s linear infinite" }}>✨</div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#7C5CFC", marginBottom: 6 }}>
-            Weaving your magic story…
+      <div style={{ ...cardBase, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
+        {/* Spinning diya emoji */}
+        <div style={{ position: "relative", width: 80, height: 80 }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: "50%",
+            border: "3px solid #F5F3FF",
+            borderTop: "3px solid #7C5CFC",
+            animation: "spin .9s linear infinite",
+            position: "absolute",
+          }} />
+          <div style={{
+            position: "absolute", inset: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 36,
+          }}>🪔</div>
+        </div>
+
+        {/* Rotating message */}
+        <div style={{ textAlign: "center", maxWidth: 220 }}>
+          <div style={{
+            fontSize: 15, fontWeight: 700, color: "#7C5CFC",
+            marginBottom: 8, minHeight: 24,
+            transition: "opacity .3s",
+          }}>
+            {STORY_MSGS[msgIdx]}
           </div>
-          <div style={{ fontSize: 13, color: "#9CA3AF" }}>
-            Creating {displayName}&apos;s adventure
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, color: "#9CA3AF" }}>
+            <span>Creating</span>
+            <strong style={{ color: "#374151" }}>{displayName}&apos;s</strong>
+            <span>adventure</span>
           </div>
+        </div>
+
+        {/* Animated dots progress */}
+        <div className="dm-dots" style={{ color: "#C4B5FD" }}>
+          <span /><span /><span />
         </div>
       </div>
     );
@@ -157,13 +199,17 @@ export default function StoryCard({ story, loading, displayName, readingTime, sa
         }>
           <button style={{ ...actionBtn, opacity: saved || saving ? .6 : 1 }}
             onClick={onSave} disabled={saving || saved}>
-            {saved ? "✅ Saved" : saving ? "⏳…" : "🔖 Save"}
+            {saved ? "✅ Saved" : saving
+              ? <><span className="dm-spinner dm-spinner--purple" />Saving</>
+              : "🔖 Save"}
           </button>
         </Show>
         <button style={actionBtn} onClick={onPdf}>⬇️ PDF</button>
         <button style={{ ...actionBtn, opacity: tts.isLoading ? .6 : 1 }}
           disabled={tts.isLoading} onClick={handleRead}>
-          {tts.isLoading ? "🎧…" : directPlaying || tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
+          {tts.isLoading
+            ? <><span className="dm-spinner dm-spinner--purple" />Loading</>
+            : directPlaying || tts.isSpeaking ? "⏹ Stop" : "🔊 Read"}
         </button>
         <button style={{ ...actionBtn, borderColor: "#7C5CFC", color: "#7C5CFC" }} onClick={onNew}>
           🔄 New story
