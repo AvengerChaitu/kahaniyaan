@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const TRACK_DURATION = 480;
+const TRACK_DURATION = 420;
 
 export default function AudioDemo() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -40,20 +40,20 @@ export default function AudioDemo() {
             <img src="/dadima/audio-track-artwork.png" alt="The Clever Elephant story artwork" />
           </div>
           <div className="dm-audio-info">
-            <div className="dm-audio-title">The Clever Elephant</div>
+            <div className="dm-audio-title">गजराज की समझदारी</div>
             <div className="dm-audio-meta">
               <span>Hindi</span>
               <span className="dm-dot" />
-              <span>8 min</span>
+              <span>7 min</span>
               <span className="dm-dot" />
-              <span>Bedtime</span>
+              <span>Panchatantra</span>
             </div>
             <div className="dm-track">
               <div className="dm-track-fill" style={{ width: `${progress}%` }} />
             </div>
             <div className="dm-track-time">
               <span>{timeDisplay}</span>
-              <span>08:00</span>
+              <span>07:00</span>
             </div>
           </div>
           <div className="dm-audio-controls">

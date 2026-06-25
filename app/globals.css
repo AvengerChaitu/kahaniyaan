@@ -144,8 +144,8 @@ body {
 /* ── Languages ───────────────────────────────────────────── */
 .dm-languages { padding: 0 64px 80px; max-width: 1280px; margin: 0 auto; }
 .dm-section-title { font-size: 22px; font-weight: 700; color: var(--dm-dark); margin: 0 0 24px; letter-spacing: -.01em; }
-.dm-language-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.dm-language-chip { display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fff; border: 1.5px solid var(--dm-border); border-radius: 12px; padding: 13px 20px; min-width: 82px; cursor: pointer; transition: all .2s; }
+.dm-language-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.dm-language-chip { display: flex; flex-direction: column; align-items: center; gap: 6px; background: #fff; border: 1.5px solid var(--dm-border); border-radius: 14px; padding: 20px 16px; cursor: pointer; transition: all .2s; }
 .dm-language-chip:hover { border-color: var(--dm-primary); box-shadow: 0 2px 14px rgba(124,92,252,.14); transform: translateY(-2px); }
 .dm-language-script { font-size: 17px; font-weight: 700; line-height: 1.2; }
 .dm-language-name { font-size: 11px; font-weight: 500; color: var(--dm-gray); margin-top: 2px; }
@@ -385,6 +385,7 @@ input:focus, textarea:focus {
   .dm-hero-art img { max-width: 320px; }
   .dm-hero-sub { max-width: none; }
   .dm-audio-demo, .dm-languages, .dm-themes, .dm-testimonials { padding-left: 20px; padding-right: 20px; }
+  .dm-language-grid { grid-template-columns: repeat(2, 1fr); }
   .dm-audio-body { flex-direction: column; align-items: stretch; }
   .dm-audio-controls { justify-content: center; }
   .dm-how { padding: 48px 20px; }

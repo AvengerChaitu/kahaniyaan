@@ -7,11 +7,6 @@ export default function Footer() {
             Dadi<span className="dm-logo-accent">Ma</span><span className="dm-logo-emoji">🪔</span>
           </div>
           <p className="dm-footer-desc">Magical stories. Timeless values. In your child&apos;s language.</p>
-          <div className="dm-footer-social">
-            <a href="#" aria-label="Facebook">f</a>
-            <a href="#" aria-label="Instagram">◎</a>
-            <a href="#" aria-label="YouTube">▶</a>
-          </div>
         </div>
 
         <div className="dm-footer-col">

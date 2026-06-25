@@ -4,22 +4,24 @@ const TESTIMONIALS = [
     author:   "Priya",
     location: "Hyderabad",
     qColor:   "#7C5CFC",
-    avatar:   "/dadima/avatar-priya.png",
+    initial:  "P",
+    initialBg: "#7C5CFC",
   },
   {
     quote:    "Finally, screen time feels meaningful. The stories are educational and so engaging.",
     author:   "Arjun",
     location: "Bengaluru",
     qColor:   "#059669",
-    avatar:   "/dadima/avatar-arjun.png",
+    initial:  "A",
+    initialBg: "#059669",
   },
   {
     quote:    "As grandparents, we love how Dadima keeps our culture and languages alive for our grandchildren.",
-    author:   "Sharma Family",
+    author:   "Sharma",
     location: "Pune",
     qColor:   "#EA580C",
-    initials: "SF",
-    initialsBg: "#EA580C",
+    initial:  "S",
+    initialBg: "#EA580C",
   },
 ];
 
@@ -33,16 +35,12 @@ export default function TestimonialsSection() {
             <span className="dm-quote-mark" style={{ color: t.qColor }}>&ldquo;</span>
             <p className="dm-quote-text">{t.quote}</p>
             <div className="dm-testimonial-footer">
-              {t.avatar ? (
-                <img src={t.avatar} alt={t.author} className="dm-testimonial-avatar" />
-              ) : (
-                <div
-                  className="dm-testimonial-avatar dm-testimonial-avatar--initials"
-                  style={{ background: t.initialsBg }}
-                >
-                  {t.initials}
-                </div>
-              )}
+              <div
+                className="dm-testimonial-avatar dm-testimonial-avatar--initials"
+                style={{ background: t.initialBg }}
+              >
+                {t.initial}
+              </div>
               <div>
                 <div className="dm-testimonial-author">— {t.author}</div>
                 <div className="dm-testimonial-location">{t.location}</div>
