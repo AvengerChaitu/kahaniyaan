@@ -34,7 +34,9 @@ export async function GET(req: NextRequest) {
       ),
     ].join("\r\n");
 
-    return new NextResponse(csv, {
+    // BOM tells Excel/Numbers to interpret the file as UTF-8 (needed for Indic scripts)
+    const BOM = "﻿";
+    return new NextResponse(BOM + csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": 'attachment; filename="dadima-stories.csv"',
