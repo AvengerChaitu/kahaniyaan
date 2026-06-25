@@ -34,6 +34,16 @@ interface Story {
   age: string; childName: string; moral?: string; moralLabel?: string; ttsUrl?: string;
 }
 
+// localStorage helpers — persist which story IDs the user has already seen per combo
+function seenKey(lang: string, theme: string) { return `dadima_seen_${lang}_${theme}`; }
+function getSeenIds(lang: string, theme: string): number[] {
+  try { return JSON.parse(localStorage.getItem(seenKey(lang, theme)) ?? "[]"); } catch { return []; }
+}
+function markSeen(lang: string, theme: string, id: number, cycled: boolean) {
+  const ids = cycled ? [id] : [...new Set([...getSeenIds(lang, theme), id])];
+  localStorage.setItem(seenKey(lang, theme), JSON.stringify(ids));
+}
+
 export default function HomePage() {
   const { isSignedIn } = useUser();
   const [childName,     setChildName]     = useState("Arjun");
@@ -46,7 +56,6 @@ export default function HomePage() {
   const [saved,         setSaved]         = useState(false);
   const [saving,        setSaving]        = useState(false);
   const [showComing,    setShowComing]    = useState("");
-  const [excludeIds,    setExcludeIds]    = useState<number[]>([]);
 
   const tts = useSpeechSynthesis();
 
@@ -55,6 +64,7 @@ export default function HomePage() {
     setLoading(true); setStory(null); setSaved(false); setError("");
     try {
       const ageValue = selectedAge.replace(" yrs", "");
+      const excludeIds = getSeenIds(selectedLang, selectedTheme);
       const res  = await fetch("/api/generate-story", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,7 +73,7 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate story");
       setStory({ title: data.title, body: data.body, language: selectedLang, theme: selectedTheme, age: ageValue, childName: childName.trim(), moral: data.moral, moralLabel: getMoralLabel(selectedLang), ttsUrl: data.ttsUrl || undefined });
-      if (data.templateId) setExcludeIds(prev => [data.templateId, ...prev].slice(0, 3));
+      if (data.templateId) markSeen(selectedLang, selectedTheme, data.templateId, data.cycled ?? false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {

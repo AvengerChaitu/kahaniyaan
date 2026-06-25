@@ -72,33 +72,33 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fetch matching stories (ignore age_group - all stories available for any age)
-    let query = supabaseAdmin
+    // Fetch all matching stories for this language + theme
+    const { data: allTemplates, error } = await supabaseAdmin
       .from("story_templates")
       .select("*")
       .eq("language", language)
       .eq("theme", theme);
-
-    if (excludeIds && Array.isArray(excludeIds) && excludeIds.length > 0) {
-      query = query.not("id", "in", `(${excludeIds.join(",")})`);
-    }
-
-    const { data: templates, error } = await query;
 
     if (error) {
       console.error("Supabase error:", error);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
-    if (!templates || templates.length === 0) {
+    if (!allTemplates || allTemplates.length === 0) {
       return NextResponse.json(
         { error: `No stories available for ${language}/${theme}. New stories coming soon!` },
         { status: 404 }
       );
     }
 
-    // Pick a random story
-    const template = templates[Math.floor(Math.random() * templates.length)];
+    // Exclude already-seen IDs; if all are seen, cycle (reset exclusions)
+    const seenSet = new Set(Array.isArray(excludeIds) ? excludeIds : []);
+    let pool = allTemplates.filter(t => !seenSet.has(t.id));
+    const cycled = pool.length === 0;
+    if (cycled) pool = allTemplates; // full reset
+
+    // Pick a random story from the remaining pool
+    const template = pool[Math.floor(Math.random() * pool.length)];
 
     // Replace placeholders
     const title = template.title.replace(/\{childname\}/g, name);
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ title, body, moral, templateId: template.id, ttsUrl: computeTtsUrl(template.body, language) });
+    return NextResponse.json({ title, body, moral, templateId: template.id, ttsUrl: computeTtsUrl(template.body, language), cycled });
   } catch (error) {
     console.error("Story fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch story" }, { status: 500 });
